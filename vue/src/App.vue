@@ -1,29 +1,35 @@
 <template>
-  <nav>
-    <router-link to="/">Home</router-link>
-  </nav>
+  <navigation-bar></navigation-bar>
   <router-view/>
 </template>
 
+<script>
+import NavigationBar from '@/components/NavigationBar'
+
+export default {
+  components: { NavigationBar }
+}
+</script>
+
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR&family=Roboto&family=Ubuntu&display=swap');
+
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
+  box-sizing: border-box;
+  font-family: 'Noto Sans KR', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
 }
 
-nav {
-  padding: 30px;
-}
-
-nav a {
+#app .nav-item a {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: larger;
   font-weight: bold;
-  color: #2c3e50;
 }
 
-nav a.router-link-exact-active {
-  color: #42b983;
+.container {
+  margin: 5rem 0;
 }
 </style>

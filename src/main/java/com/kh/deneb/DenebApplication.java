@@ -1,15 +1,15 @@
-package com.kh.pickpack;
+package com.kh.deneb;
 
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-@MapperScan(basePackages = "com.kh.pickpack")
-public class PickpackApplication {
+@MapperScan(basePackages = "com.kh.deneb")
+public class DenebApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(PickpackApplication.class, args);
+		SpringApplication.run(DenebApplication.class, args);
 	}
 
 }

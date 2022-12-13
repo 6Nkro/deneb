@@ -7,6 +7,18 @@ const routes = [
     name: 'home',
     component: HomeView
   }
+  // {
+  //   path: '/account',
+  //   redirect: '/',
+  //   children: [
+  //     {
+  //       path: 'signup',
+  //       name: 'signup',
+  //       component: () =>
+  //         import(/* webpackChunkName: "account" */ '@/views/account/AccountSignUp')
+  //     }
+  //   ]
+  // }
 ]
 
 const router = createRouter({

@@ -1,4 +1,4 @@
-package com.kh.pickpack.controllers;
+package com.kh.deneb.controllers;
 
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.web.bind.annotation.GetMapping;
