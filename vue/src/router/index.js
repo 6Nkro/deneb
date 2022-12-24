@@ -6,19 +6,22 @@ const routes = [
     path: '/',
     name: 'home',
     component: HomeView
+  },
+  {
+    path: '/library',
+    name: 'library',
+    component: () =>
+      import(/* webpackChunkName: "library" */ '@/views/LibraryView')
+  },
+  {
+    path: '/community',
+    name: 'community',
+    component: () =>
+      import(/* webpackChunkName: "community" */ '@/views/CommunityView')
+    // redirect: ''
+    // children: []
   }
-  // {
-  //   path: '/account',
-  //   redirect: '/',
-  //   children: [
-  //     {
-  //       path: 'signup',
-  //       name: 'signup',
-  //       component: () =>
-  //         import(/* webpackChunkName: "account" */ '@/views/account/AccountSignUp')
-  //     }
-  //   ]
-  // }
+
 ]
 
 const router = createRouter({

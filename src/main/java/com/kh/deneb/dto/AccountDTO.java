@@ -6,10 +6,10 @@ import java.sql.Timestamp;
 
 @Data
 public class AccountDTO {
-    private int account_no;
+    private int account_seq;
     private String user_email;
     private String user_pw;
     private String user_name;
     private Timestamp signup_date;
-    private String storage_order;
+    private String bookcase_order;
 }

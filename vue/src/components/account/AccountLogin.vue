@@ -1,25 +1,62 @@
 <template>
-  <vue-final-modal v-model="showModal" classes="modal-container" content-class="modal-content" name="login"
-                   @closed="close" :lock-scroll="true" :click-to-close="true" :esc-to-close="true">
+  <vue-final-modal v-model="showModal"
+                   classes="modal-container"
+                   content-class="modal-content elevation-3"
+                   :lock-scroll="true"
+                   :click-to-close="true"
+                   :esc-to-close="true"
+                   @closed="close">
 
-    <font-awesome-icon icon="fa-solid fa-xmark" class="modal__close" @click="showModal = false"/>
+    <v-icon
+      icon="mdi-close"
+      class="modal__close"
+      color="#808080"
+      @click="showModal = false"/>
 
-    <span class="modal__title"><img src="@/assets/images/title_black.png" alt="deneb"></span>
+    <span class="modal__title">
+      <img src="@/assets/images/title_black.png" alt="deneb">
+    </span>
     <div class="modal__content">
+
+      <v-responsive
+        class="mx-auto"
+        max-width="192">
+
+        <v-text-field
+          variant="underlined"
+          label="이메일"
+          v-model="user_email"
+          :class="{invalid: user_email === ''}"
+          :rules="[rules.required]"
+          @keyup.enter="login"
+          maxlength="64"/>
+
+        <v-text-field
+          variant="underlined"
+          label="비밀번호"
+          type="password"
+          v-model="user_pw"
+          :class="{invalid: user_pw === ''}"
+          :rules="[rules.required]"
+          @keyup.enter="login"
+          maxlength="20"/>
+      </v-responsive>
+
       <div>
-        <input type="text" :class="{ invalid: user_email === '' }" v-model="user_email" @keyup.enter="login"
-               placeholder="이메일" maxlength="64">
+        <loading-button
+          :text="text"
+          :loading="loading"
+          @click="login"/>
       </div>
       <div>
-        <input type="password" :class="{ invalid: user_pw === '' }" v-model="user_pw" @keyup.enter="login"
-               placeholder="비밀번호" maxlength="20">
-      </div>
-      <div>
-        <custom-button :text="text" :loading="loading" @click="login"></custom-button>
-      </div>
-      <div>
-        <span style="font-size: small">아직 회원이 아니신가요?
-          <a href="javascript:void(0)" @click="this.$emit('switch')">회원가입</a></span>
+        <span style="font-size: small">
+          아직 회원이 아니신가요?
+          <a
+            href="javascript:void(0)"
+            @click="this.$emit('switch')">
+            회원가입
+          </a>
+        </span>
       </div>
     </div>
   </vue-final-modal>
@@ -28,20 +65,22 @@
 <script>
 
 import { VueFinalModal } from 'vue-final-modal'
-import CustomButton from '@/components/CustomButton'
+import LoadingButton from '@/components/common/LoadingButton'
 
 export default {
   components: {
-    VueFinalModal,
-    CustomButton
+    VueFinalModal, LoadingButton
   },
   data () {
     return {
       showModal: true,
+      user_email: '',
+      user_pw: '',
       text: '로그인',
       loading: false,
-      user_email: '',
-      user_pw: ''
+      rules: {
+        required: value => !!value || ''
+      }
     }
   },
   setup () {
@@ -73,8 +112,9 @@ export default {
       console.log(res)
       console.log(res.data)
       if (res.data) {
-        close()
-        this.$setLogin(res.data)
+        this.close()
+        this.$store.commit('setLogin', { account: res.data.account, library: res.data.library })
+        console.log(this.$store.state.bookStore.library)
         this.$router.go()
       } else {
         const data = {
@@ -112,12 +152,10 @@ export default {
   border-radius: 0.25rem;
   background: #fff;
   width: 20rem;
-  height: 24rem;
+  height: 25rem;
   min-width: 20rem;
-  min-height: 24rem;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: 1px 1px 5px 1px #404040;
+  min-height: 25rem;
+  text-align: center;
 }
 
 .modal__title {
@@ -139,21 +177,8 @@ img {
   width: 10rem;
 }
 
-input {
-  padding-left: 0.3rem;
-  padding-right: 0.3rem;
-  border: 0;
-  border-bottom: 1px solid #808080;
-  margin: 0 0 2rem 0;
-  width: 12rem;
-}
-
-input:focus {
-  outline: none;
-}
-
 button {
-  margin: 0 0 0.5rem 0;
+  margin: 1rem 0 0.5rem 0;
   width: 12rem;
 }
 

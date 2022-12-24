@@ -16,17 +16,6 @@ const methods = {
       return false
     }
   },
-  getState () {
-    return this.$store.state.accountStore
-  },
-
-  setLogin (payload) {
-    this.$store.commit('setLogin', payload)
-  },
-
-  setLogout () {
-    this.$store.commit('setLogout')
-  },
   getDateFormat (unformedDate) {
     const date = new Date(unformedDate)
     let month = date.getMonth() + 1
@@ -49,9 +38,6 @@ export default {
   install (Vue) {
     Vue.config.globalProperties.$wobble = methods.wobble
     Vue.config.globalProperties.$isValid = methods.isValid
-    Vue.config.globalProperties.$getState = methods.getState
-    Vue.config.globalProperties.$setLogin = methods.setLogin
-    Vue.config.globalProperties.$setLogout = methods.setLogout
     Vue.config.globalProperties.$getDateFormat = methods.getDateFormat
   }
 }

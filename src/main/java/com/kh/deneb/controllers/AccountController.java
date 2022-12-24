@@ -1,5 +1,6 @@
 package com.kh.deneb.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.gson.Gson;
 import com.kh.deneb.dto.AccountDTO;
 import com.kh.deneb.service.AccountService;
@@ -30,13 +31,13 @@ public class AccountController {
 
     @PostMapping("/join")
     @ResponseBody
-    public boolean join(AccountDTO dto) {
-        return accountService.isJoin(dto);
+    public String accountJoin(AccountDTO account) throws JsonProcessingException {
+        return new Gson().toJson(accountService.getDefaultAccount(account));
     }
 
     @PostMapping("/login")
     @ResponseBody
-    public String login(String user_email, String user_pw) {
+    public String accountLogin(String user_email, String user_pw) throws JsonProcessingException {
         return new Gson().toJson(accountService.getAccount(user_email, user_pw));
     }
 }

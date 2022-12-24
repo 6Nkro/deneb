@@ -3,25 +3,34 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 import axios from 'axios'
-import BootstrapVue3 from 'bootstrap-vue-3'
 import VueSweetalert2 from 'vue-sweetalert2'
 import { vfmPlugin } from 'vue-final-modal'
 import common from './assets/common.js'
 
-import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap-vue-3/dist/bootstrap-vue-3.css'
-import 'sweetalert2/dist/sweetalert2.min.css'
+import 'vuetify/styles'
+import { createVuetify } from 'vuetify'
+import * as components from 'vuetify/components'
+import * as directives from 'vuetify/directives'
+import { aliases, mdi } from 'vuetify/iconsets/mdi'
 
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { fas } from '@fortawesome/free-solid-svg-icons'
-library.add(fas)
+import 'sweetalert2/dist/sweetalert2.min.css'
+import '@mdi/font/css/materialdesignicons.css'
+
+const vuetify = createVuetify({
+  components,
+  directives,
+  icons: {
+    defaultSet: 'mdi',
+    aliases,
+    sets: {
+      mdi
+    }
+  }
+})
 
 const app = createApp(App)
 
 app.config.globalProperties.$axios = axios
-
-app.component('font-awesome-icon', FontAwesomeIcon)
 
 app.use(vfmPlugin({
   key: '$vfm',
@@ -31,7 +40,7 @@ app.use(vfmPlugin({
 
 app.use(store)
   .use(router)
-  .use(BootstrapVue3)
+  .use(vuetify)
   .use(VueSweetalert2)
   .use(common)
   .mount('#app')

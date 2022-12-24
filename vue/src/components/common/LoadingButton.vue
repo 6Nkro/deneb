@@ -1,8 +1,15 @@
 <template>
-  <button :class="{loading: loading}">
+  <v-btn
+  variant="outlined">
     {{ text }}
-    <b-spinner v-if="loading" small label="Loading..."></b-spinner>
-  </button>
+    <v-progress-circular
+      v-if="loading"
+      width="3"
+      size="20"
+      color="blue"
+      indeterminate/>
+  </v-btn>
+
 </template>
 
 <script>
@@ -19,8 +26,7 @@ export default {
 button {
   color: #808080;
   background-color: transparent;
-  border: 1px solid #808080;
-  border-radius: 1rem;
+  border-radius: 0.8rem;
   padding: 0.5rem 1rem;
   background-size: 200% 100%;
   background-image: linear-gradient(to right, transparent 50%, #808080 50%);

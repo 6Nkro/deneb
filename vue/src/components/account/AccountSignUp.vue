@@ -1,49 +1,110 @@
 <template>
-  <vue-final-modal v-model="showModal" classes="modal-container" content-class="modal-content" name="signup"
-                   @closed="close" :lock-scroll="true" :click-to-close="true" :esc-to-close="true">
+  <vue-final-modal
+    v-model="showModal"
+    classes="modal-container"
+    content-class="modal-content elevation-3"
+    :lock-scroll="true"
+    :click-to-close="true"
+    :esc-to-close="true"
+    @closed="close">
 
-    <font-awesome-icon icon="fa-solid fa-xmark" class="modal__close" @click="showModal = false"/>
+    <v-icon
+      icon="mdi-close"
+      class="modal__close"
+      color="#808080"
+      @click="showModal = false"/>
 
-    <span class="modal__title"><img src="@/assets/images/title_black.png" alt="deneb"></span>
+    <span class="modal__title">
+      <img src="@/assets/images/title_black.png" alt="deneb">
+    </span>
 
     <div class="modal__content">
+
       <div>
-        <input type="text" placeholder="이메일" id="user_email" :class="{ invalid: !user_email.valid }"
-               v-model="user_email.value" @change="setMessage(user_email)" maxlength="64">
+        <input
+          type="text"
+          placeholder="이메일"
+          id="user_email"
+          v-model="user_email.value"
+          :class="{ invalid: !user_email.valid }"
+          @change="setMessage(user_email)"
+          maxlength="64">
       </div>
       <div class="text-start">
-        <label for="user_email" :class="{ invalid: !user_email.valid }">{{ user_email.msg }}</label>
+        <label
+          for="user_email"
+          :class="{ invalid: !user_email.valid }">{{ user_email.msg }}
+        </label>
       </div>
 
       <div>
-        <input type="password" placeholder="비밀번호(8~20자)" id="user_pw" :class="{ invalid: !user_pw.valid }"
-               v-model="user_pw.value" @input="setMessage(user_pw); setMessage(chk_pw)" maxlength="20">
+        <input
+          type="password"
+          placeholder="비밀번호(8~20자)"
+          id="user_pw"
+          v-model="user_pw.value"
+          :class="{ invalid: !user_pw.valid }"
+          @input="setMessage(user_pw); setMessage(chk_pw)"
+          maxlength="20">
       </div>
       <div class="text-start">
-        <label for="user_pw" :class="{ invalid: !user_pw.valid }">{{ user_pw.msg }}</label>
+        <label
+          for="user_pw"
+          :class="{ invalid: !user_pw.valid }">{{ user_pw.msg }}
+        </label>
       </div>
 
       <div>
-        <input type="password" placeholder="비밀번호 확인" id="chk_pw" :class="{ invalid: !chk_pw.valid }"
-               v-model="chk_pw.value" @input="setMessage(chk_pw)" maxlength="20">
+
+        <input
+          type="password"
+          placeholder="비밀번호 확인"
+          id="chk_pw"
+          v-model="chk_pw.value"
+          :class="{ invalid: !chk_pw.valid }"
+          @input="setMessage(chk_pw)"
+          maxlength="20">
       </div>
       <div class="text-start">
-        <label for="chk_pw" :class="{ invalid: !chk_pw.valid }">{{ chk_pw.msg }}</label>
+        <label
+          for="chk_pw"
+          :class="{ invalid: !chk_pw.valid }">{{ chk_pw.msg }}
+        </label>
       </div>
 
       <div>
-        <input type="text" placeholder="닉네임(2~12자)" id="user_name" :class="{ invalid: !user_name.valid }"
-               v-model="user_name.value" @change="setMessage(user_name)" maxlength="12">
+        <input
+          type="text"
+          placeholder="닉네임(2~12자)"
+          id="user_name"
+          v-model="user_name.value"
+          :class="{ invalid: !user_name.valid }"
+          @change="setMessage(user_name)"
+          maxlength="12">
       </div>
       <div class="text-start">
-        <label for="user_name" :class="{ invalid: !user_name.valid }">{{ user_name.msg }}</label>
+        <label
+          for="user_name"
+          :class="{ invalid: !user_name.valid }">{{ user_name.msg }}
+        </label>
       </div>
 
       <div style="margin-top: 1.2rem"></div>
-      <custom-button :text="text" :loading="loading" @click="join"></custom-button>
+
+      <loading-button
+        :text="text"
+        :loading="loading"
+        @click="join"/>
+
       <div>
-        <span style="font-size: small">이미 계정이 있으신가요?
-          <a href="javascript:void(0)" @click="this.$emit('switch')">로그인</a></span>
+        <span style="font-size: small">
+          이미 계정이 있으신가요?
+          <a
+            href="javascript:void(0)"
+            @click="this.$emit('switch')">
+            로그인
+          </a>
+        </span>
       </div>
     </div>
   </vue-final-modal>
@@ -52,12 +113,11 @@
 <script>
 
 import { VueFinalModal } from 'vue-final-modal'
-import CustomButton from '@/components/CustomButton'
+import LoadingButton from '@/components/common/LoadingButton'
 
 export default {
   components: {
-    VueFinalModal,
-    CustomButton
+    VueFinalModal, LoadingButton
   },
   data () {
     return {
@@ -154,8 +214,6 @@ export default {
     async duplCheckMessage (item) {
       const params = { [item.key]: item.value }
       const res = await this.$axios.get(item.checkUrl, { params })
-      console.log(res)
-      console.log(res.data)
       item.valid = !res.data
       const text = item.key === 'user_email' ? '이메일' : '닉네임'
       item.msg = res.data ? '이미 등록된 ' + text + ' 입니다' : item.validMsg
@@ -168,6 +226,7 @@ export default {
       }
       this.text = ''
       this.loading = true
+
       const url = '/account/join'
       const params = {
         user_email: this.user_email.value,
@@ -178,12 +237,9 @@ export default {
       if (!res.data) {
         return false
       }
-      const account = await this.$axios.post('/account/login', null, { params })
-      if (!account.data) {
-        return false
-      }
-      this.$setLogin(account.data)
-      close()
+      this.$store.commit('setLogin', { account: res.data.account, library: res.data.library })
+      this.close()
+
       const data = {
         title: 'Welcome!',
         icon: 'success',
@@ -220,9 +276,7 @@ export default {
   height: 32.5rem;
   min-width: 20rem;
   min-height: 32.5rem;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: 1px 1px 5px 1px #404040;
+  text-align: center;
 }
 
 .modal__title {
@@ -270,8 +324,9 @@ div[class=text-start] {
 }
 
 label {
+  position: relative;
   font-size: small;
-  transform: translate(3rem, 0);
+  left:3rem;
 }
 
 label[class=invalid] {

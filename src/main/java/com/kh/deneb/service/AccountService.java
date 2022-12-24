@@ -1,14 +1,17 @@
 package com.kh.deneb.service;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.kh.deneb.commons.CommonConstants;
+import com.kh.deneb.commons.CommonUtils;
 import com.kh.deneb.dao.AccountDAO;
-import com.kh.deneb.dao.StorageDAO;
+import com.kh.deneb.dao.BookcaseDAO;
 import com.kh.deneb.dto.AccountDTO;
+import com.kh.deneb.dto.BookcaseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 @Service
@@ -17,38 +20,40 @@ public class AccountService {
     AccountDAO accountDAO;
 
     @Autowired
-    StorageDAO storageDAO;
+    BookcaseDAO bookcaseDAO;
+
+    @Autowired
+    LibraryService libraryService;
 
     @Transactional
-    public boolean isJoin(AccountDTO dto) {
-        String user_email = dto.getUser_email();
-        String user_pw = dto.getUser_pw();
-        String user_name = dto.getUser_name();
-
-        boolean validEmail = user_email.matches(CommonConstants.EMAIL_REGEX);
-        boolean validPw = user_pw.matches(CommonConstants.PW_REGEX);
-        boolean validName = user_name.matches(CommonConstants.NAME_REGEX);
+    public HashMap<String, Object> getDefaultAccount(AccountDTO account) throws JsonProcessingException {
+        boolean validEmail = account.getUser_email().matches(CommonConstants.EMAIL_REGEX);
+        boolean validPw = account.getUser_pw().matches(CommonConstants.PW_REGEX);
+        boolean validName = account.getUser_name().matches(CommonConstants.NAME_REGEX);
 
         if (!validEmail || !validPw || !validName) {
-            return false;
+            return null;
         }
 
         int account_seq = accountDAO.selectNextSeq();
-        int storage_seq = storageDAO.selectNextSeq();
+        int bookcase_seq = bookcaseDAO.selectNextSeq();
 
-        HashMap<String, Object> order = new HashMap<>();
-        order.put("order", new int[]{storage_seq});
+        account.setAccount_seq(account_seq);
+        account.setUser_pw(CommonUtils.getSHA512(account.getUser_pw()));
+        account.setBookcase_order(Arrays.toString(new int[]{bookcase_seq}));
+
+        BookcaseDTO bookcase = new BookcaseDTO();
+        bookcase.setBookcase_seq(bookcase_seq);
+        bookcase.setAccount_seq(account_seq);
+
+        accountDAO.insert(account);
+        bookcaseDAO.insertDefault(bookcase);
 
         HashMap<String, Object> data = new HashMap<>();
-        data.put("account_no", account_seq);
-        data.put("user_email", user_email);
-        data.put("user_pw", user_pw);
-        data.put("user_name", user_name);
-        data.put("storage_order", new Gson().toJson(order));
+        data.put("account", account);
+        data.put("library", libraryService.getBookcaseList(account.getUser_email(), account.getUser_pw()));
 
-        data.put("storage_no", storage_seq);
-
-        return accountDAO.insert(data) == 1 && storageDAO.insertDefault(data) == 1;
+        return data;
     }
 
     public boolean isExistedEmail(String user_email) {
@@ -59,10 +64,19 @@ public class AccountService {
         return accountDAO.selectCountByName(user_name) >= 1;
     }
 
-    public AccountDTO getAccount(String user_email, String user_pw) {
+    public HashMap<String, Object> getAccount(String user_email, String user_pw) throws JsonProcessingException {
+        AccountDTO accountDTO = new AccountDTO();
+        accountDTO.setUser_email(user_email);
+        accountDTO.setUser_pw(CommonUtils.getSHA512(user_pw));
+
+        AccountDTO account = accountDAO.selectAllByEmailAndPw(accountDTO);
+        if (account == null) {
+            return null;
+        }
+
         HashMap<String, Object> data = new HashMap<>();
-        data.put("user_email", user_email);
-        data.put("user_pw", user_pw);
-        return accountDAO.getAccount(data);
+        data.put("account", account);
+        data.put("library", libraryService.getBookcaseList(user_email, accountDTO.getUser_pw()));
+        return data;
     }
 }
