@@ -268,14 +268,11 @@ export default {
   display: flex;
   flex-direction: column;
   margin: 0 1rem;
-  padding: 1rem;
+  padding: 1rem 0 2rem;
   border: #404040;
   border-radius: 0.25rem;
   background: #fff;
-  width: 20rem;
-  height: 32.5rem;
   min-width: 20rem;
-  min-height: 32.5rem;
   text-align: center;
 }
 

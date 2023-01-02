@@ -19,6 +19,7 @@ body {
 }
 
 #app {
+  min-width: 100vw;
   box-sizing: border-box;
   font-family: 'Noto Sans KR', sans-serif;
   -webkit-font-smoothing: antialiased;

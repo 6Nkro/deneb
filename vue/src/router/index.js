@@ -14,12 +14,19 @@ const routes = [
       import(/* webpackChunkName: "library" */ '@/views/LibraryView')
   },
   {
-    path: '/community',
-    name: 'community',
+    path: '/share',
+    name: 'share',
     component: () =>
-      import(/* webpackChunkName: "community" */ '@/views/CommunityView')
-    // redirect: ''
-    // children: []
+      import(/* webpackChunkName: "share" */ '@/views/ShareView'),
+    redirect: '/share/list/1',
+    children: [
+      {
+        path: 'list/:page',
+        name: 'shareList',
+        component: () =>
+          import(/* webpackChunkName: "share" */ '@/views/ShareView')
+      }
+    ]
   }
 
 ]

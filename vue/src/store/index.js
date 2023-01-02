@@ -16,7 +16,8 @@ export default createStore({
       state.accountStore.account = null
       state.bookStore.library = null
     },
-    refresh: function (state) {
+    refresh: function (state, payload) {
+      state.bookStore.library = payload
       state.bookStore.library.splice(0, 0)
     },
     addBookcase: function (state, payload) {
@@ -56,6 +57,9 @@ export default createStore({
     editBookState: function (state, payload) {
       state.bookStore.library[payload.bookcaseIndex].bookList[payload.bookIndex].book.book_open = payload.value
     },
+    editVideoTime: function (state, payload) {
+      state.bookStore.library[payload.bookcaseIndex].bookList[payload.bookIndex].book.video_time = payload.value
+    },
     addBookmark: function (state, payload) {
       state.bookStore.library[payload.bookcaseIndex].bookList[payload.bookIndex].bookmarkList.push(payload.bookmark)
     },
@@ -78,8 +82,7 @@ export default createStore({
   },
   modules: {
     accountStore: accountStore,
-    bookStore:
-    bookStore
+    bookStore: bookStore
   },
   plugins: [createPersistedState({
     paths: ['accountStore', 'bookStore']

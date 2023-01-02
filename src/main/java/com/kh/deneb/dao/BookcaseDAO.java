@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 @Mapper
 @Repository
 public interface BookcaseDAO {
-    @Insert("insert into bookcase values (#{bookcase_seq}, #{account_seq}, '나의 책장', '[]')")
+    @Insert("insert into bookcase values (#{bookcase_seq}, #{account_seq}, '빈 페이지', '[]')")
     void insertDefault(BookcaseDTO bookcase);
 
     @Insert("insert into bookcase values (#{bookcase_seq}, #{account_seq}, #{bookcase_name}, '[]')")
@@ -33,4 +33,7 @@ public interface BookcaseDAO {
 
     @Update("update bookcase set bookcase_name = #{bookcase_name} where bookcase_seq = #{bookcase_seq}")
     void updateNameBySeq(BookcaseDTO bookcase);
+
+    @Insert("insert into bookcase values (#{bookcase_seq}, #{account_seq}, #{bookcase_name}, #{book_order})")
+    void insertClone(BookcaseDTO bookcase);
 }

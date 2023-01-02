@@ -3,6 +3,7 @@
   <v-layout>
 
     <v-app-bar
+      class="nav-bar"
       color="#121212">
       <img src="@/assets/images/title.png"
            alt="deneb"
@@ -23,10 +24,10 @@
       </router-link>
 
       <router-link
-        to="/community"
+        to="/share"
         @click="closeAll">
-        <v-icon>mdi-forum</v-icon>
-        COMMUNITY
+        <v-icon>mdi-comment-bookmark</v-icon>
+        SHARE
       </router-link>
 
       <template v-slot:append>
@@ -116,6 +117,10 @@ export default {
 <style scoped>
 
 @media (min-width: 768px) {
+}
+
+.nav-bar {
+  min-width: 720px;
 }
 
 img {

@@ -55,4 +55,8 @@ public class BookService {
         bookDAO.updateBySeq(book);
         return libraryService.getBook(book.getBook_seq());
     }
+
+    public int editVideoTime(BookDTO book) {
+        return bookDAO.updateVideoTimeBySeq(book);
+    }
 }

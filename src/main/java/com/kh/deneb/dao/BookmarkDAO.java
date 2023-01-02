@@ -33,4 +33,5 @@ public interface BookmarkDAO {
 
     @Update("update bookmark set parent_book_seq = #{parent_book_seq} where bookmark_seq = #{bookmark_seq}")
     void updateParentBySeq(BookmarkDTO bookmark);
+
 }

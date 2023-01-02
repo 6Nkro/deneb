@@ -12,6 +12,7 @@ import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import { aliases, mdi } from 'vuetify/iconsets/mdi'
+import YouTube from 'vue3-youtube'
 
 import 'sweetalert2/dist/sweetalert2.min.css'
 import '@mdi/font/css/materialdesignicons.css'
@@ -43,4 +44,5 @@ app.use(store)
   .use(vuetify)
   .use(VueSweetalert2)
   .use(common)
+  .component('YouTube', YouTube)
   .mount('#app')

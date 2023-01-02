@@ -8,6 +8,11 @@ public class BookDTO {
     int parent_bookcase_seq;
     String book_name;
     String book_color;
+    String book_icon;
+    String book_icon_color;
+    String book_type;
+    String video_id;
+    int video_time;
     char book_open;
     String bookmark_order;
 }

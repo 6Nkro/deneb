@@ -65,4 +65,10 @@ public class BookController {
     public String moveBook(String user_email, String user_pw, int book_seq, int origin_seq, int destination_seq) throws JsonProcessingException {
         return new Gson().toJson(libraryService.moveBook(user_email, user_pw, book_seq, origin_seq, destination_seq));
     }
+
+    @PostMapping("/time")
+    @ResponseBody
+    public int editVideoTime(BookDTO book) {
+        return bookService.editVideoTime(book);
+    }
 }

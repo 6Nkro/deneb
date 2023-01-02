@@ -14,8 +14,8 @@
 </template>
 
 <script>
-import LibrarySideBar from '@/components/library/LibrarySideBar'
-import BookcaseContents from '@/components/bookcase/BookcaseContents'
+import LibrarySideBar from '@/components/library/sidebar/LibrarySideBar'
+import BookcaseContents from '@/components/library/bookcase/BookcaseContents'
 
 export default {
   components: { LibrarySideBar, BookcaseContents },
@@ -28,7 +28,14 @@ export default {
   },
   setup () {
   },
-  created () {
+  async created () {
+    const url = '/bookcase/list'
+    const params = {
+      user_email: this.$store.state.accountStore.account.user_email,
+      user_pw: this.$store.state.accountStore.account.user_pw
+    }
+    const res = await this.$axios.get(url, { params })
+    this.$store.commit('refresh', res.data)
   },
   mounted () {
   },
@@ -48,6 +55,5 @@ export default {
   position: relative;
   display: inline-flex;
   min-height: 100vh;
-  padding-top: 64px;
 }
 </style>

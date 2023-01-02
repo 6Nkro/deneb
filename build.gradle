@@ -36,6 +36,7 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
     implementation 'com.google.code.gson:gson'
+    implementation 'org.apache.commons:commons-lang3'
 }
 
 tasks.named('test') {

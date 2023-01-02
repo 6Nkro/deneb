@@ -1,11 +1,12 @@
 <template>
-  <vue-final-modal v-model="showModal"
-                   classes="modal-container"
-                   content-class="modal-content elevation-3"
-                   :lock-scroll="true"
-                   :click-to-close="true"
-                   :esc-to-close="true"
-                   @closed="close">
+  <vue-final-modal
+    v-model="showModal"
+    classes="modal-container"
+    content-class="modal-content elevation-3"
+    :lock-scroll="true"
+    :click-to-close="true"
+    :esc-to-close="true"
+    @closed="close" >
 
     <v-icon
       icon="mdi-close"
@@ -14,56 +15,60 @@
       @click="showModal = false"/>
 
     <span class="modal__title">
-      <img src="@/assets/images/title_black.png" alt="deneb">
+      <v-icon
+        icon="mdi-bookshelf"
+        size="x-large"/>
     </span>
+
     <div class="modal__content">
+
+      <v-radio-group
+        class="mb-3"
+        v-model="inputCode"
+        inline
+        hide-details>
+
+        <v-row>
+          <v-col cols="6" class="text-end">
+            <v-radio
+              label="직접 생성"
+              :value="false"
+              color="indigo"/>
+          </v-col>
+
+          <v-col cols="6" class="text-start">
+            <v-radio
+              label="코드 입력"
+              :value="true"
+              color="indigo"/>
+          </v-col>
+        </v-row>
+
+      </v-radio-group>
 
       <v-responsive
         class="mx-auto"
-        max-width="192">
-
+        max-width="256">
         <v-text-field
           variant="underlined"
-          label="이메일"
-          v-model="user_email"
-          :class="{invalid: user_email === ''}"
+          :label="inputCode ? '공유 코드' : '이름'"
+          v-model="bookcase_name"
+          :class="{invalid: bookcase_name === ''}"
           :rules="[rules.required]"
-          @keyup.enter="login"
-          maxlength="64"/>
-
-        <v-text-field
-          variant="underlined"
-          label="비밀번호"
-          type="password"
-          v-model="user_pw"
-          :class="{invalid: user_pw === ''}"
-          :rules="[rules.required]"
-          @keyup.enter="login"
-          maxlength="20"/>
+          counter
+          maxlength="12"/>
       </v-responsive>
 
-      <div>
-        <loading-button
-          :text="text"
-          :loading="loading"
-          @click="login"/>
-      </div>
-      <div>
-        <span style="font-size: small">
-          아직 회원이 아니신가요?
-          <a
-            href="javascript:void(0)"
-            @click="this.$emit('switch')">
-            회원가입
-          </a>
-        </span>
-      </div>
+      <loading-button
+        :text="text"
+        :loading="loading"
+        @click="create"/>
     </div>
   </vue-final-modal>
+
 </template>
 
 <script>
-
 import { VueFinalModal } from 'vue-final-modal'
 import LoadingButton from '@/components/common/LoadingButton'
 
@@ -74,10 +79,10 @@ export default {
   data () {
     return {
       showModal: true,
-      user_email: '',
-      user_pw: '',
-      text: '로그인',
+      text: '확인',
       loading: false,
+      inputCode: false,
+      bookcase_name: '',
       rules: {
         required: value => !!value || ''
       }
@@ -96,37 +101,37 @@ export default {
       this.showModal = true
       this.$emit('close')
     },
-    async login () {
+    async create () {
       const items = document.querySelectorAll('.invalid')
       if (this.loading || !this.$isValid(items)) {
         return false
       }
       this.text = ''
       this.loading = true
-      const url = '/account/login'
+      const url = this.inputCode ? '/share/import' : '/bookcase/create'
       const params = {
-        user_email: this.user_email,
-        user_pw: this.user_pw
+        user_email: this.$store.state.accountStore.account.user_email,
+        user_pw: this.$store.state.accountStore.account.user_pw,
+        [this.inputCode ? 'share_code' : 'bookcase_name']: this.bookcase_name
       }
       const res = await this.$axios.post(url, null, { params })
-      if (res.data) {
-        this.close()
-        this.$store.commit('setLogin', { account: res.data.account, library: res.data.library })
-        this.$router.go()
-      } else {
+      if (!res.data && this.inputCode) {
         const data = {
-          title: 'Error',
           icon: 'error',
-          text: 'ID가 등록되지 않았거나 비밀번호가 올바르지 않습니다.'
+          html: '<strong>공유 코드가 유효하지 않아요.</strong>'
         }
         this.$swal.fire(data)
           .then(result => {
             if (result.isConfirmed || result.isDismissed) {
-              this.text = '로그인'
+              this.text = '확인'
               this.loading = false
             }
           })
+        return false
       }
+      this.$store.commit('addBookcase', { bookcase: res.data })
+      this.$emit('select', this.$store.state.bookStore.library.length - 1)
+      this.close()
     }
   }
 }
@@ -148,7 +153,7 @@ export default {
   border: #404040;
   border-radius: 0.25rem;
   background: #fff;
-  min-width: 20rem;
+  min-width: 22rem;
   text-align: center;
 }
 
@@ -167,17 +172,9 @@ export default {
   font-size: 1.5rem;
 }
 
-img {
-  width: 10rem;
-}
-
 button {
-  margin: 1rem 0 0.5rem 0;
-  width: 12rem;
-}
-
-span {
-  color: #404040;
+  width: 16rem;
+  margin: 1rem 0 0 0;
 }
 
 </style>
