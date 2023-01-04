@@ -154,7 +154,6 @@ public class ShareService {
 
         ObjectMapper mapper = new ObjectMapper();
         ArrayList<Integer> sub_book_order = mapper.readValue(subBookcase.getBook_order(), ArrayList.class);
-        System.out.println(sub_book_order);
         ArrayList<Integer> book_order = new ArrayList<>();
 
         for (int sub_book_seq : sub_book_order) {
@@ -214,11 +213,38 @@ public class ShareService {
         HashMap<String, Object> params = new HashMap<>();
         HashMap<String, Object> postList = new HashMap<>();
 
-        params.put("minSeq", page * 10 - 9);
-        params.put("maxSeq", page * 10);
+        params.put("minSeq", page * 12 - 11);
+        params.put("maxSeq", page * 12);
 
         postList.put("postList", subBookcaseDAO.selectAllListBySeqRange(params));
         postList.put("count", subBookcaseDAO.selectCountPublic());
+
+        return postList;
+    }
+
+    public HashMap<String, Object> getPostSearchList(int page, String search_type, String search_text) {
+        HashMap<String, Object> params = new HashMap<>();
+        HashMap<String, Object> postList = new HashMap<>();
+
+        switch (search_type) {
+            case "내용":
+                search_type = "share_contents";
+                break;
+            case "태그":
+                search_type = "share_tag";
+                break;
+            case "작성자":
+                search_type = "user_name";
+                break;
+        }
+
+        params.put("minSeq", page * 12 - 11);
+        params.put("maxSeq", page * 12);
+        params.put("search_type", search_type);
+        params.put("search_text", search_text);
+
+        postList.put("postList", subBookcaseDAO.selectSearchListBySeqRange(params));
+        postList.put("count", subBookcaseDAO.selectSearchCountPublic(params));
 
         return postList;
     }
@@ -235,16 +261,26 @@ public class ShareService {
         return result;
     }
 
-    public HashMap<String, Object> getPostDetail(String user_email, String user_pw, int bookcase_seq) throws JsonProcessingException {
+    public HashMap<String, Object> getPostDetail(BookcaseDTO bookcase) throws JsonProcessingException {
 
         HashMap<String, Object> detail = new HashMap<>();
 
-        detail.put("bookList", getSubBookList(bookcase_seq));
-        BookcaseDTO bookcase = new BookcaseDTO();
-        bookcase.setAccount_seq(getAccountSeq(user_email, user_pw));
-        bookcase.setBookcase_seq(bookcase_seq);
+        detail.put("bookList", getSubBookList(bookcase.getBookcase_seq()));
         detail.put("like_already", likeCountDAO.selectCountBySeq(bookcase) != 0);
 
         return detail;
+    }
+
+    public List<SubBookcaseDTO> getShareList(int account_seq) {
+        return subBookcaseDAO.selectAllListByAccountSeq(account_seq);
+    }
+
+    public List<SubBookcaseDTO> getChartList() {
+        return subBookcaseDAO.selectAllListByLikeCount();
+    }
+
+    public List<SubBookcaseDTO> deleteShare(int account_seq, int bookcase_seq) {
+        subBookcaseDAO.deleteBySeq(bookcase_seq);
+        return subBookcaseDAO.selectAllListByAccountSeq(account_seq);
     }
 }

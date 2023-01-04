@@ -56,4 +56,8 @@ public class BookmarkService {
         bookmarkDAO.updateParentBySeq(bookmark);
         return bookmarkDAO.selectAllBySeq(bookmark.getBookmark_seq());
     }
+
+    public int editVideoTime(BookmarkDTO bookmark) {
+        return bookmarkDAO.updateVideoTimeBySeq(bookmark);
+    }
 }

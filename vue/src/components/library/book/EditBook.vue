@@ -18,18 +18,83 @@
        <input
          type="color"
          class="color-custom"
-         v-model="book_color">
+         v-model="icon_color">
       <v-icon
-        icon="mdi-book-open-page-variant"
+        :icon="icon"
         size="x-large"
-        :color="book_color"/>
+        :color="icon_color"/>
     </span>
 
     <div class="modal__content">
 
+      <v-radio-group
+        readonly
+        class="mb-3"
+        v-model="book_type"
+        inline
+        hide-details>
+
+        <v-row>
+          <v-col cols="6" class="text-end">
+            <v-radio
+              label="북마크 북"
+              value="Bookmark"
+              color="indigo"/>
+          </v-col>
+
+          <v-col cols="6" class="text-start">
+            <v-radio
+              label="비디오 북"
+              value="Video"
+              color="indigo"/>
+          </v-col>
+        </v-row>
+
+      </v-radio-group>
+
       <div>
         <fieldset>
-          <legend>Book color
+          <legend>Icon
+            <input
+              style="position: absolute;"
+              type="color"
+              v-model="icon_color">
+          </legend>
+
+          <v-slide-group
+            show-arrows
+            style="width:20rem">
+
+            <v-slide-group-item
+              v-for="icon in icons"
+              :key="icon">
+              <v-icon
+                class="icon"
+                :class="{selected: icon === this.icon}"
+                :icon="icon"
+                @click="this.icon=icon"/>
+            </v-slide-group-item>
+
+          </v-slide-group>
+
+          <div>
+            <span
+              class="color-filter my-3"
+              v-for="item in colors"
+              :key="item">
+          <div
+            class="color-pick"
+            :style="{'background-color': item}"
+            @click="icon_color=item"/>
+            </span>
+          </div>
+        </fieldset>
+      </div>
+
+      <div>
+        <fieldset
+          :style="`border:2px solid ${book_color}`">
+          <legend>Line color
             <input
               style="position: absolute;"
               type="color"
@@ -47,36 +112,6 @@
         </fieldset>
       </div>
 
-      <div>
-        <fieldset>
-          <legend>Icon
-            <input
-              style="position: absolute;"
-              type="color"
-              v-model="icon_color">
-          </legend>
-          <v-icon
-            class="icon"
-            :class="{selected: icon === this.icon}"
-            v-for="icon in icons"
-            :key="icon"
-            :icon="icon"
-            :color="icon_color"
-            @click="this.icon=icon"/>
-          <div>
-            <span
-              class="color-filter my-3"
-              v-for="item in colors"
-              :key="item">
-          <div
-            class="color-pick"
-            :style="{'background-color': item}"
-            @click="icon_color=item"/>
-            </span>
-          </div>
-        </fieldset>
-      </div>
-
       <v-responsive
         class="mx-auto my-3"
         max-width="320">
@@ -89,18 +124,6 @@
           counter
           maxlength="12"/>
 
-        <v-text-field
-          v-if="book_type==='Video'"
-          class="text-start"
-          variant="underlined"
-          label="URL"
-          v-model="video_url"
-          :class="{invalid: book_type === 'Video' && (video_url === '' || !video_valid)}"
-          :rules="[rules.required]"
-          :loading="video_loading"
-          :hint="hint"
-          persistent-hint
-          @change="getVideoData"/>
       </v-responsive>
 
       <loading-button
@@ -132,10 +155,6 @@ export default {
       loading: false,
       book_type: this.book.book_type,
       book_name: this.book.book_name,
-      video_url: 'https://youtu.be/' + this.book.video_id,
-      video_loading: false,
-      hint: '',
-      video_valid: true,
       book_color: this.book.book_color,
       colors: [
         '#9896A4',
@@ -152,16 +171,33 @@ export default {
       icon: this.book.book_icon,
       icon_color: this.book.book_icon_color,
       icons: [
-        'mdi-book-multiple',
+        'mdi-book-open-page-variant',
         'mdi-star',
         'mdi-heart',
+        'mdi-book-multiple',
         'mdi-youtube',
+        'mdi-email',
         'mdi-forum',
         'mdi-cart',
+        'mdi-music',
         'mdi-controller',
         'mdi-silverware-fork-knife',
         'mdi-information',
-        'mdi-briefcase'
+        'mdi-briefcase',
+        'mdi-camera',
+        'mdi-movie',
+        'mdi-tennis-ball',
+        'mdi-map-marker',
+        'mdi-car',
+        'mdi-headset',
+        'mdi-hospital-box',
+        'mdi-chef-hat',
+        'mdi-cloud',
+        'mdi-cog',
+        'mdi-dice-3',
+        'mdi-glass-cocktail',
+        'mdi-lock',
+        'mdi-watch'
       ],
       rules: {
         required: value => !!value || ''
@@ -171,7 +207,6 @@ export default {
   setup () {
   },
   created () {
-    this.getVideoData(this.video_url)
   },
   mounted () {
   },
@@ -195,8 +230,7 @@ export default {
         book_name: this.book_name,
         book_color: this.book_color,
         book_icon: this.icon,
-        book_icon_color: this.icon_color,
-        video_id: this.getId(this.video_url)
+        book_icon_color: this.icon_color
       }
       const res = await this.$axios.post(url, null, { params })
       if (!res.data) {
@@ -208,35 +242,6 @@ export default {
         bookIndex: this.bookIndex
       })
       this.close()
-    },
-    async getVideoData () {
-      const videoId = this.getId(this.video_url)
-      if (videoId === null) {
-        this.hint = '* 올바른 형식의 URL을 입력하세요.'
-        this.video_valid = false
-        return false
-      }
-      this.video_loading = true
-      const url = 'https://www.googleapis.com/youtube/v3/videos'
-      const params = {
-        part: 'snippet',
-        id: videoId,
-        key: 'AIzaSyDyq-JOF0s6xKnoBl1ZrQ1vadozAv7Xzss'
-      }
-      const res = await this.$axios.get(url, { params })
-      this.video_loading = false
-      if (res.data.items.length === 0) {
-        this.hint = '* 동영상을 찾을 수 없어요.'
-        this.video_valid = false
-        return false
-      }
-      const title = res.data.items[0].snippet.title
-      this.hint = title.length < 25 ? '* ' + title : '* ' + title.slice(0, 24) + '...'
-      this.video_valid = true
-    },
-    getId (url) {
-      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
-      return url.match(regExp) === null ? null : url.match(regExp)[2]
     }
   }
 }

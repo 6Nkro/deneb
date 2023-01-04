@@ -34,14 +34,27 @@
           maxlength="12"/>
 
         <v-text-field
-          class="mb-7"
+          v-if="book_type==='Bookmark'"
+          class="mb-3"
           variant="underlined"
           label="URL"
           v-model="bookmark_url"
           :class="{invalid: bookmark_url === ''}"
           :rules="[rules.required]"
-          hide-details
           maxlength="1000"/>
+
+        <v-text-field
+          v-if="book_type==='Video'"
+          class="text-start mb-3"
+          variant="underlined"
+          label="URL"
+          v-model="video_url"
+          :class="{invalid: video_url === '' || !video_valid}"
+          :rules="[rules.required]"
+          :loading="video_loading"
+          :hint="hint"
+          persistent-hint
+          @change="getVideoData"/>
 
         <v-textarea
           variant="outlined"
@@ -50,8 +63,9 @@
           no-resize
           rows="3"
           counter
-          maxlength="60" />
+          maxlength="60"/>
       </v-responsive>
+
       <loading-button
         :text="text"
         :loading="loading"
@@ -67,6 +81,7 @@ import LoadingButton from '@/components/common/LoadingButton'
 
 export default {
   props: {
+    book: Object,
     bookmark: Object,
     bookcaseIndex: Number,
     bookIndex: Number,
@@ -86,6 +101,13 @@ export default {
       bookmark_url: this.bookmark.bookmark_url,
       bookmark_memo: this.bookmark.bookmark_memo,
       bookmark_icon: '',
+      book_type: this.book.book_type,
+      video_url: 'https://www.youtube.com/watch?v=' + this.bookmark.video_id,
+      video_title: this.bookmark.video_title,
+      video_channel: this.bookmark.video_channel,
+      video_loading: false,
+      hint: '',
+      video_valid: true,
       rules: {
         required: value => !!value || ''
       }
@@ -94,6 +116,7 @@ export default {
   setup () {
   },
   created () {
+    this.getVideoData(this.video_url)
   },
   mounted () {
   },
@@ -116,9 +139,12 @@ export default {
         bookmark_seq: this.bookmark_seq,
         parent_book_seq: this.parent_book_seq,
         bookmark_name: this.bookmark_name,
-        bookmark_url: this.bookmark_url,
+        bookmark_url: this.book.book_type === 'Bookmark' ? this.bookmark_url : '-',
         bookmark_memo: this.bookmark_memo,
-        bookmark_icon: this.bookmark_icon
+        bookmark_icon: this.bookmark_icon,
+        video_id: this.book.book_type === 'Video' ? this.getId(this.video_url) : '-',
+        video_title: this.book.book_type === 'Video' ? this.video_title : '-',
+        video_channel: this.book.book_type === 'Video' ? this.video_channel : '-'
       }
       const res = await this.$axios.post(url, null, { params })
       if (!res.data) {
@@ -131,6 +157,37 @@ export default {
         bookmarkIndex: this.bookmarkIndex
       })
       this.close()
+    },
+    async getVideoData () {
+      const videoId = this.getId(this.video_url)
+      if (videoId === null) {
+        this.hint = '* 올바른 형식의 URL을 입력하세요.'
+        this.video_valid = false
+        return false
+      }
+      this.video_loading = true
+      const url = 'https://www.googleapis.com/youtube/v3/videos'
+      const params = {
+        part: 'snippet',
+        id: videoId,
+        key: 'AIzaSyDyq-JOF0s6xKnoBl1ZrQ1vadozAv7Xzss'
+      }
+      const res = await this.$axios.get(url, { params })
+      this.video_loading = false
+      if (res.data.items.length === 0) {
+        this.hint = '* 동영상을 찾을 수 없어요.'
+        this.video_valid = false
+        return false
+      }
+      const title = res.data.items[0].snippet.title
+      this.hint = title.length < 20 ? '* ' + title : '* ' + title.slice(0, 19) + '...'
+      this.video_title = title
+      this.video_channel = res.data.items[0].snippet.channelTitle
+      this.video_valid = true
+    },
+    getId (url) {
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
+      return url.match(regExp) === null ? null : url.match(regExp)[2]
     }
   }
 }

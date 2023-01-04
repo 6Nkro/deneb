@@ -59,4 +59,10 @@ public class BookmarkController {
     public boolean deleteBookmark(int bookmark_seq) throws JsonProcessingException {
         return libraryService.deleteBookmark(bookmark_seq);
     }
+
+    @PostMapping("/time")
+    @ResponseBody
+    public int editVideoTime(BookmarkDTO bookmark) {
+        return bookmarkService.editVideoTime(bookmark);
+    }
 }

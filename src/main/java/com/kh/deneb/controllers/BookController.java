@@ -54,6 +54,12 @@ public class BookController {
         return bookService.editBookState(book_seq, book_open);
     }
 
+    @PostMapping("/index")
+    @ResponseBody
+    public int editBookState(BookDTO book) {
+        return bookService.editBookIndex(book);
+    }
+
     @PostMapping("/delete")
     @ResponseBody
     public boolean deleteBook(int book_seq) throws JsonProcessingException {
@@ -64,11 +70,5 @@ public class BookController {
     @ResponseBody
     public String moveBook(String user_email, String user_pw, int book_seq, int origin_seq, int destination_seq) throws JsonProcessingException {
         return new Gson().toJson(libraryService.moveBook(user_email, user_pw, book_seq, origin_seq, destination_seq));
-    }
-
-    @PostMapping("/time")
-    @ResponseBody
-    public int editVideoTime(BookDTO book) {
-        return bookService.editVideoTime(book);
     }
 }

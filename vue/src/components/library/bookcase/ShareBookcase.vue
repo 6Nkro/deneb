@@ -185,15 +185,27 @@ export default {
       if (!res.data) {
         return false
       }
-      // this.$store.commit('addBook', {
-      //   book: res.data,
-      //   bookcaseIndex: this.bookcaseIndex
-      // })
       this.close()
       const data = {
         icon: 'success',
-        html: '<strong>' + res.data.bookcase.share_code + '</strong>' +
-          '<br><br>코드는 <a href="/">공유함<a>에서 다시 확인할 수 있어요.'
+        html: `
+        <input
+        type="text"
+        value="${res.data.bookcase.share_code}"
+        style="
+        text-align: center;
+        height: 2rem;
+        font-weight: bold;
+        font-size: large;
+        border: 0;
+        background-color: #E8E8E8;
+        outline: none;
+        cursor: pointer;"
+        onclick="this.select()
+        document.execCommand('Copy')
+        this.setSelectionRange(0, 0)"
+        readonly>
+        <br><br>코드는 <a href="/myshare">공유함<a>에서 다시 확인할 수 있어요.`
       }
       this.$swal.fire(data)
     }

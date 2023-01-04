@@ -2,7 +2,7 @@
 
   <div class="book-group">
     <div
-      :class="item.book.book_type === 'Bookmark' ? 'book' : 'video-book'"
+      class="book"
       v-for="item in bookList"
       :key="item.book.book_seq">
 
@@ -30,14 +30,8 @@
       <div
         class="book-content elevation-3">
         <share-bookmark-list
-          v-if="item.book.book_type === 'Bookmark'"
+          :book="item.book"
           :bookmarkList="item.bookmarkList"/>
-
-        <div v-if="item.book.book_type === 'Video'">
-          <YouTube
-            :src="'https://www.youtube.com/watch?v=' + item.book.video_id"
-            :vars="{start: 0}"/>
-        </div>
 
       </div>
     </div>
@@ -77,14 +71,8 @@ export default {
 
 .book {
   position: relative;
-  min-width: 15rem;
+  min-width: 18rem;
   margin: 1.5rem;
-}
-
-.video-book {
-  position: relative;
-  width: 40rem;
-  margin: 2rem;
 }
 
 .book-title {

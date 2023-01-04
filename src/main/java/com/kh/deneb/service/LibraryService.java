@@ -179,7 +179,9 @@ public class LibraryService {
         BookDTO book = new BookDTO();
         book.setBook_seq(book_seq);
         book.setBookmark_order("[" + URLDecoder.decode(bookmark_order, "UTF-8") + "]");
+        book.setVideo_index(0);
 
+        bookDAO.updateIndexBySeq(book);
         return bookDAO.updateOrderBySeq(book) == 1;
     }
 

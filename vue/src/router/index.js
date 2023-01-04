@@ -16,8 +16,6 @@ const routes = [
   {
     path: '/share',
     name: 'share',
-    component: () =>
-      import(/* webpackChunkName: "share" */ '@/views/ShareView'),
     redirect: '/share/list/1',
     children: [
       {
@@ -25,6 +23,19 @@ const routes = [
         name: 'shareList',
         component: () =>
           import(/* webpackChunkName: "share" */ '@/views/ShareView')
+      }
+    ]
+  },
+  {
+    path: '/account',
+    name: 'account',
+    redirect: '/account/myshare',
+    children: [
+      {
+        path: 'myshare',
+        name: 'myshare',
+        component: () =>
+          import(/* webpackChunkName: "account" */ '@/views/MyShareView')
       }
     ]
   }

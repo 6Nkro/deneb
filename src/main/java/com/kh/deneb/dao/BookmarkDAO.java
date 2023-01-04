@@ -10,7 +10,8 @@ import java.util.List;
 @Repository
 public interface BookmarkDAO {
 
-    @Insert("insert into bookmark values (#{bookmark_seq}, #{parent_book_seq}, #{bookmark_name}, #{bookmark_url}, #{bookmark_memo}, 'icon.png')")
+    @Insert("insert into bookmark values (#{bookmark_seq}, #{parent_book_seq}, #{bookmark_name}, #{bookmark_url}," +
+            " #{bookmark_memo}, #{video_id}, #{video_title}, #{video_channel}, 0)")
     void insert(BookmarkDTO bookmark);
 
     @Select("select bookmark_seq.nextval from dual")
@@ -28,10 +29,15 @@ public interface BookmarkDAO {
     @Select("select bookmark_seq from bookmark where parent_book_seq = #{value}")
     List<Integer> selectSeqByParentSeq(int parent_book_seq);
 
-    @Update("update bookmark set bookmark_name = #{bookmark_name}, bookmark_url = #{bookmark_url}, bookmark_memo = #{bookmark_memo} where bookmark_seq = #{bookmark_seq}")
+    @Update("update bookmark set bookmark_name = #{bookmark_name}, bookmark_url = #{bookmark_url}," +
+            " bookmark_memo = #{bookmark_memo}, video_id = #{video_id}, video_title = #{video_title}," +
+            " video_channel = #{video_channel} where bookmark_seq = #{bookmark_seq}")
     void updateBySeq(BookmarkDTO bookmark);
 
     @Update("update bookmark set parent_book_seq = #{parent_book_seq} where bookmark_seq = #{bookmark_seq}")
     void updateParentBySeq(BookmarkDTO bookmark);
+
+    @Update("update bookmark set video_time = #{video_time} where bookmark_seq = #{bookmark_seq}")
+    int updateVideoTimeBySeq(BookmarkDTO bookmark);
 
 }

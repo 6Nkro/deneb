@@ -13,8 +13,14 @@ export default createStore({
     },
     setLogout: function (state) {
       state.accountStore.isLogin = false
-      state.accountStore.account = null
-      state.bookStore.library = null
+      state.accountStore.account = {
+        account_seq: 0,
+        user_email: 'guest',
+        user_pw: 'guest',
+        user_name: 'guest',
+        bookcase_order: []
+      }
+      state.bookStore.library = []
     },
     refresh: function (state, payload) {
       state.bookStore.library = payload
@@ -57,8 +63,8 @@ export default createStore({
     editBookState: function (state, payload) {
       state.bookStore.library[payload.bookcaseIndex].bookList[payload.bookIndex].book.book_open = payload.value
     },
-    editVideoTime: function (state, payload) {
-      state.bookStore.library[payload.bookcaseIndex].bookList[payload.bookIndex].book.video_time = payload.value
+    editVideoIndex: function (state, payload) {
+      state.bookStore.library[payload.bookcaseIndex].bookList[payload.bookIndex].book.video_index = payload.value
     },
     addBookmark: function (state, payload) {
       state.bookStore.library[payload.bookcaseIndex].bookList[payload.bookIndex].bookmarkList.push(payload.bookmark)
@@ -78,6 +84,11 @@ export default createStore({
     editBookmark: function (state, payload) {
       state.bookStore.library[payload.bookcaseIndex].bookList[payload.bookIndex].bookmarkList[payload.bookmarkIndex] = payload.bookmark
       state.bookStore.library.splice(0, 0)
+    },
+    editVideoTime: function (state, payload) {
+      const index = state.bookStore.library[payload.bookcaseIndex].bookList[payload.bookIndex].bookmarkList
+        .findIndex(item => item.bookmark_seq === payload.bookmark_seq)
+      state.bookStore.library[payload.bookcaseIndex].bookList[payload.bookIndex].bookmarkList[index].video_time = payload.value
     }
   },
   modules: {

@@ -13,7 +13,7 @@ public interface SubBookDAO {
     @Select("select sub_book_seq.nextval from dual")
     int selectNextSeq();
 
-    @Insert("insert into sub_book values (#{book_seq}, #{parent_bookcase_seq}, #{book_name}, #{book_color}, #{book_icon}, #{book_icon_color}, #{book_type}, #{video_id}, #{bookmark_order})")
+    @Insert("insert into sub_book values (#{book_seq}, #{parent_bookcase_seq}, #{book_name}, #{book_color}, #{book_icon}, #{book_icon_color}, #{book_type}, #{bookmark_order})")
     void insert(BookDTO book);
 
     @Select("select bookmark_order from sub_book where book_seq = #{value}")

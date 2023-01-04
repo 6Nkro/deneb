@@ -11,8 +11,7 @@ public class BookDTO {
     String book_icon;
     String book_icon_color;
     String book_type;
-    String video_id;
-    int video_time;
+    int video_index;
     char book_open;
     String bookmark_order;
 }

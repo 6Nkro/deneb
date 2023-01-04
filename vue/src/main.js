@@ -16,6 +16,7 @@ import YouTube from 'vue3-youtube'
 
 import 'sweetalert2/dist/sweetalert2.min.css'
 import '@mdi/font/css/materialdesignicons.css'
+import 'aos/dist/aos.css'
 
 const vuetify = createVuetify({
   components,

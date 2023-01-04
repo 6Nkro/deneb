@@ -323,7 +323,7 @@ div[class=text-start] {
 label {
   position: relative;
   font-size: small;
-  left:3rem;
+  left:4rem;
 }
 
 label[class=invalid] {

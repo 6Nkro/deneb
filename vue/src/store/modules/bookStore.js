@@ -2,7 +2,7 @@ import { createStore } from 'vuex'
 
 export default createStore({
   state: {
-    library: null
+    library: []
   },
   getters: {
   },

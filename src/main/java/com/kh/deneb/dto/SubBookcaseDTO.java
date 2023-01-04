@@ -19,4 +19,5 @@ public class SubBookcaseDTO {
     String user_name;
     int like_count;
     int share_count;
+    int reply_count;
 }

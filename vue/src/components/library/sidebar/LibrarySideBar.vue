@@ -7,7 +7,7 @@
       item-key="bookcase_seq">
       <template #header>
         <div class="sideBar-header elevation-3">
-          <span>안녕</span>
+          <img src="@/assets/images/banner.png" alt="bookcase">
           <v-btn
             variant="plain"
             class="toggle"
@@ -21,7 +21,7 @@
           block
           class="bookcase"
           :class="{selected: element.bookcase.bookcase_seq === this.bookcase.bookcase_seq}"
-          @click="select(index)">
+          @click="this.$emit('select', index)">
           {{ element.bookcase.bookcase_name }}
         </v-btn>
       </template>
@@ -29,19 +29,18 @@
         <v-btn
           block
           class="bookcase-create"
-          @click="createBookcase = true">
+          @click="this.$emit('create')">
           <v-icon
             icon="mdi-plus-box-multiple"
             color="grey"/>
         </v-btn>
       </template>
     </draggable>
-    <create-bookcase v-if="createBookcase" @close="createBookcase = false" @select="select"></create-bookcase>
   </div>
 </template>
 
 <script>
-import CreateBookcase from '@/components/library/sidebar/CreateBookcase'
+
 import Draggable from 'vuedraggable/src/vuedraggable'
 
 export default {
@@ -49,11 +48,9 @@ export default {
     sideBar: Boolean,
     bookcase: Object
   },
-  components: { CreateBookcase, Draggable },
+  components: { Draggable },
   data () {
-    return {
-      createBookcase: false
-    }
+    return {}
   },
   setup () {
   },
@@ -88,13 +85,6 @@ export default {
     }
   },
   methods: {
-    select (index) {
-      this.$emit('select', index)
-    },
-    log (element, list) {
-      console.log(element)
-      console.log(list)
-    }
   }
 }
 </script>
@@ -114,12 +104,9 @@ export default {
 .sideBar-header {
   position: relative;
   width: inherit;
-  height: 4rem;
+  height: 135px;
   display: flex;
   align-items: center;
-  padding-left: 1rem;
-  font-size: larger;
-  text-align: left;
 }
 
 .bookcase-header {
@@ -135,8 +122,8 @@ export default {
 
 .toggle {
   margin-left: auto;
-  width: 4rem;
-  height: 4rem;
+  width: 3rem;
+  height: 3rem;
   font-size: larger;
 }
 
@@ -164,7 +151,13 @@ export default {
 }
 
 button {
-  text-transform:none !important;
+  text-transform: none !important;
+}
+
+img {
+  position: absolute;
+  width: 100%;
+  height: 135px;
 }
 
 </style>

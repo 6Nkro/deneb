@@ -10,7 +10,7 @@ import java.util.List;
 @Repository
 public interface BookDAO {
 
-    @Insert("insert into book values (#{book_seq}, #{parent_bookcase_seq}, #{book_name}, #{book_color}, #{book_icon}, #{book_icon_color}, #{book_type}, #{video_id}, 0, 'Y', '[]')")
+    @Insert("insert into book values (#{book_seq}, #{parent_bookcase_seq}, #{book_name}, #{book_color}, #{book_icon}, #{book_icon_color}, #{book_type}, 0, 'Y', '[]')")
     void insert(BookDTO book);
 
     @Select("select book_seq.nextval from dual")
@@ -37,15 +37,15 @@ public interface BookDAO {
     @Update("update book set book_open = #{book_open} where book_seq = #{book_seq}")
     int updateStateBySeq(BookDTO book);
 
-    @Update("update book set book_name = #{book_name}, book_color = #{book_color}, book_icon = #{book_icon}, book_icon_color = #{book_icon_color}, video_id = #{video_id} where book_seq = #{book_seq}")
+    @Update("update book set book_name = #{book_name}, book_color = #{book_color}, book_icon = #{book_icon}, book_icon_color = #{book_icon_color} where book_seq = #{book_seq}")
     void updateBySeq(BookDTO book);
 
     @Update("update book set parent_bookcase_seq = #{parent_bookcase_seq} where book_seq = #{book_seq}")
     void updateParentBySeq(BookDTO book);
 
-    @Insert("insert into book values (#{book_seq}, #{parent_bookcase_seq}, #{book_name}, #{book_color}, #{book_icon}, #{book_icon_color}, #{book_type}, #{video_id}, 0, 'Y', #{bookmark_order})")
+    @Insert("insert into book values (#{book_seq}, #{parent_bookcase_seq}, #{book_name}, #{book_color}, #{book_icon}, #{book_icon_color}, #{book_type}, 0, 'Y', #{bookmark_order})")
     void insertClone(BookDTO book);
 
-    @Update("update book set video_time = #{video_time} where book_seq = #{book_seq}")
-    int updateVideoTimeBySeq(BookDTO book);
+    @Update("update book set video_index = #{video_index} where book_seq = #{book_seq}")
+    int updateIndexBySeq(BookDTO book);
 }
