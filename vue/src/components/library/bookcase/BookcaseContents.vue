@@ -31,7 +31,6 @@
         </v-btn>
       </div>
     </div>
-    <hr>
     <div class="contents">
       <book-list
         :bookcase="bookcase"
@@ -72,6 +71,7 @@
     v-if="editBookmark"
     :bookmark="bookmark"
     :bookmarkIndex="bookmarkIndex"
+    :book="book"
     :bookIndex="bookIndex"
     :bookcaseIndex="bookcaseIndex"
     @close="closeModal"/>

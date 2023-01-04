@@ -34,22 +34,45 @@
         <a
           v-if="!isLogin"
           href="javascript:void(0)"
-          @click="showLogin = true; showSignUp=false;">
+          @click="this.$emit('setLoginModal', true); showSignUp=false;">
           LOGIN
         </a>
 
         <a
           v-if="!isLogin"
           href="javascript:void(0)"
-          @click="showLogin = false; showSignUp=true;">
+          @click="this.$emit('setLoginModal', false); showSignUp=true;">
           SIGNUP
         </a>
 
-        <a
-          v-if="isLogin"
-          href="javascript:void(0)">
-          ACCOUNT
-        </a>
+        <v-menu
+          location="bottom"
+          v-if="isLogin">
+          <template v-slot:activator="{ props }">
+            <a
+              v-bind="props"
+              href="javascript:void(0)">
+              ACCOUNT
+            </a>
+          </template>
+
+          <v-list>
+            <v-list-item
+              v-for="item in accountMenu"
+              :key="item.link">
+              <router-link
+                class="text-center"
+                role="menu"
+                :to="item.link">
+                <v-icon
+                  class="mx-1"
+                  icon="mdi-package-variant"
+                />
+                {{ item.title }}
+              </router-link>
+            </v-list-item>
+          </v-list>
+        </v-menu>
 
         <a
           v-if="isLogin"
@@ -64,7 +87,7 @@
 
   <account-login
     v-if="showLogin"
-    @close="showLogin = false"
+    @close="this.$emit('setLoginModal', false)"
     @switch="this.switch"/>
 
   <account-sign-up
@@ -79,13 +102,18 @@ import AccountLogin from '@/components/account/AccountLogin'
 import AccountSignUp from '@/components/account/AccountSignUp'
 
 export default {
+  props: {
+    showLogin: Boolean
+  },
   components: { AccountLogin, AccountSignUp },
   data () {
     return {
-      showLogin: false,
       showSignUp: false,
       isLogin: this.$store.state.accountStore.isLogin,
-      active: 'Home'
+      active: 'Home',
+      accountMenu: [
+        { title: '공유함', link: '/account/myshare' }
+      ]
     }
   },
   setup () {
@@ -98,11 +126,11 @@ export default {
   },
   methods: {
     closeAll () {
-      this.showLogin = false
+      this.$emit('setLoginModal', false)
       this.showSignUp = false
     },
     switch () {
-      this.showLogin = !this.showLogin
+      this.$emit('setLoginModal', !this.showLogin)
       this.showSignUp = !this.showSignUp
     },
     logout () {
@@ -152,6 +180,14 @@ a:hover {
 
 .router-link-active:hover {
   color: white;
+}
+
+.router-link-active[role="menu"] {
+  color: #404040;
+}
+
+.router-link-active[role="menu"]:hover {
+  color: #808080;
 }
 
 a > i {

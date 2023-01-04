@@ -32,7 +32,7 @@ public class BookmarkController {
 
     @PostMapping("/create")
     @ResponseBody
-    public String createBookmark(BookmarkDTO bookmark) throws JsonProcessingException {
+    public String createBookmark(BookmarkDTO bookmark) throws JsonProcessingException, UnsupportedEncodingException {
         return new Gson().toJson(bookmarkService.createBookmark(bookmark));
     }
 
@@ -58,5 +58,11 @@ public class BookmarkController {
     @ResponseBody
     public boolean deleteBookmark(int bookmark_seq) throws JsonProcessingException {
         return libraryService.deleteBookmark(bookmark_seq);
+    }
+
+    @PostMapping("/time")
+    @ResponseBody
+    public int editVideoTime(BookmarkDTO bookmark) {
+        return bookmarkService.editVideoTime(bookmark);
     }
 }

@@ -1,31 +1,38 @@
 <template>
-    <div class="search">
+  <div class="search">
 
-      <v-select
-        variant="filled"
-        class="d-inline-block"
-        v-model="searchType"
-        :items="['내용', '태그', '작성자']"
-        hide-details
-        single-line/>
+    <v-select
+      variant="filled"
+      class="d-inline-block"
+      v-model="temp_type"
+      :items="['내용', '태그', '작성자']"
+      hide-details
+      single-line/>
 
-      <v-text-field
-        variant="filled"
-        class="d-inline-block"
-        style="width:24rem"
-        placeholder="검색어 입력"
-        type="text"
-        v-model="search"
-        :append-inner-icon="'mdi-magnify'"
-        hide-details
-        @click:append-inner="log"
-        @keydown.enter="log"
-        max-length="100"/>
-    </div>
+    <v-text-field
+      variant="filled"
+      class="d-inline-block"
+      style="width:24rem"
+      placeholder="검색어 입력"
+      type="text"
+      v-model="temp_text"
+      :append-inner-icon="'mdi-magnify'"
+      hide-details
+      @click:append-inner="searchList"
+      @keydown.enter="searchList"
+      max-length="100"/>
+  </div>
 
+  <div
+    v-if="postList.length === 0"
+    class="ma-5">
+    해당하는 데이터가 없어요.
+  </div>
+
+  <div class="post-group">
     <v-card
-      class="post mx-auto px-3 py-3 elevation-3"
-      width="720"
+      class="post ma-5 px-3 py-3 elevation-3"
+      width="360"
       @click="openDetail(item)"
       v-for="item in postList"
       :key="item.bookcase_seq">
@@ -45,50 +52,54 @@
           v-for="tag in JSON.parse(item.share_tag)"
           :key="tag">
           <v-chip
-            class="mx-1">
+            class="mx-1 tag"
+            @click="temp_type='태그'; temp_text=tag; this.searchList()">
             {{ tag }}
           </v-chip>
         </v-slide-group-item>
       </v-slide-group>
 
-      <v-row>
+      <div class="d-flex pt-1 pb-3">
 
-        <v-col cols="6" class="text-start px-5 text-truncate">
+        <div class="text-start w-50 px-3 text-truncate">
 
           <v-list-item-title>{{ item.user_name }}</v-list-item-title>
           <v-list-item-subtitle>{{ getPostDateFormat(item.share_date) }} 저장</v-list-item-subtitle>
 
-        </v-col>
+        </div>
 
-        <v-col cols="6" class="justify-end px-5 d-flex align-center text-truncate">
-          <v-icon
-            class="ml-3 mr-1"
-            icon="mdi-heart"
-            size="x-small"
-            color="red"/>
-          <span>{{ item.like_count }}</span>
-          <v-icon
-            class="ml-3 mr-1"
-            icon="mdi-share-variant"
-            size="x-small"/>
-          <span>{{ item.share_count }}</span>
-          <v-icon
-            class="ml-3 mr-1"
-            icon="mdi-message-reply-text"
-            size="x-small"/>
-          <span>22</span>
-        </v-col>
+        <div class="d-flex w-50 align-center">
+          <div class="ml-auto px-3">
+            <v-icon
+              class="ml-3 mr-1"
+              icon="mdi-heart"
+              size="x-small"
+              color="red"/>
+            <span>{{ item.like_count }}</span>
+            <v-icon
+              class="ml-3 mr-1"
+              icon="mdi-share-variant"
+              size="x-small"/>
+            <span>{{ item.share_count }}</span>
+            <v-icon
+              class="ml-3 mr-1"
+              icon="mdi-message-reply-text"
+              size="x-small"/>
+            <span>{{ item.reply_count }}</span>
+          </div>
+        </div>
 
-      </v-row>
+      </div>
 
     </v-card>
+  </div>
 
-    <v-pagination
-      class="pagination my-5"
-      v-model="currentPage"
-      :length="pageSize"
-      :total-visible="8"
-      rounded="circle"/>
+  <v-pagination
+    class="pagination mt-5 mb-10"
+    v-model="currentPage"
+    :length="pageSize"
+    :total-visible="8"
+    rounded="circle"/>
 
 </template>
 
@@ -102,8 +113,11 @@ export default {
   components: {},
   data () {
     return {
-      searchType: '내용',
-      search: '',
+      temp_type: '내용',
+      temp_text: '',
+      search_type: null,
+      search_text: null,
+      search: false,
       currentPage: this.page
     }
   },
@@ -118,13 +132,15 @@ export default {
   watch: {
     currentPage: function () {
       this.$router.push({ name: 'shareList', params: { page: this.currentPage } })
-      this.$emit('movePage', this.currentPage)
+      this.$emit('movePage', {
+        page: this.currentPage,
+        search_type: this.search_type,
+        search_text: this.search_text,
+        search: this.search
+      })
     }
   },
   methods: {
-    log () {
-      console.log(this.search)
-    },
     getPostDateFormat (date) {
       const today = new Date()
       const shareDate = new Date(new Date(date).getTime() + 32400000)
@@ -137,6 +153,18 @@ export default {
         return false
       }
       this.$emit('openDetail', item)
+    },
+    searchList () {
+      this.search = this.search_text !== ''
+      this.search_type = this.temp_type
+      this.search_text = this.temp_text
+      this.$router.push({ name: 'shareList', params: { page: 1 } })
+      this.$emit('movePage', {
+        page: 1,
+        search_type: this.search_type,
+        search_text: this.search_text,
+        search: this.search
+      })
     }
   }
 }
@@ -147,7 +175,13 @@ export default {
 .search {
   top: 64px;
   padding: 4rem 0 0 0;
-  margin: 0 0 4rem 0;
+  margin: 0 0 3rem 0;
+}
+
+.post-group {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
 }
 
 .post {
@@ -158,5 +192,17 @@ export default {
 
 .post:hover {
   background-color: #EEEEEE;
+}
+
+.tag {
+  cursor: pointer;
+}
+
+.tag:hover {
+  opacity: 0.7;
+}
+
+.tag:active {
+  opacity: 1;
 }
 </style>

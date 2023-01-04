@@ -1,13 +1,28 @@
 <template>
-  <navigation-bar></navigation-bar>
-  <router-view/>
+  <navigation-bar
+    :showLogin="showLogin"
+    @setLoginModal="setLoginModal"/>
+  <router-view
+    @setLoginModal="setLoginModal"/>
+  <common-footer/>
 </template>
 
 <script>
 import NavigationBar from '@/components/common/NavigationBar'
+import CommonFooter from '@/components/common/CommonFooter'
 
 export default {
-  components: { NavigationBar }
+  components: { NavigationBar, CommonFooter },
+  data () {
+    return {
+      showLogin: false
+    }
+  },
+  methods: {
+    setLoginModal (value) {
+      this.showLogin = value
+    }
+  }
 }
 </script>
 

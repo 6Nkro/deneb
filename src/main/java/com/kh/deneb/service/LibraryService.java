@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -159,7 +158,7 @@ public class LibraryService {
 
         AccountDTO account = new AccountDTO();
         account.setAccount_seq(getAccountSeq(user_email, encrypted_pw));
-        account.setBookcase_order("[" + URLDecoder.decode(bookcase_order, "UTF-8") + "]");
+        account.setBookcase_order(bookcase_order);
 
         return accountDAO.updateOrderBySeq(account) == 1;
     }
@@ -168,7 +167,7 @@ public class LibraryService {
 
         BookcaseDTO bookcase = new BookcaseDTO();
         bookcase.setBookcase_seq(bookcase_seq);
-        bookcase.setBook_order("[" + URLDecoder.decode(book_order, "UTF-8") + "]");
+        bookcase.setBook_order(book_order);
 
         return bookcaseDAO.updateOrderBySeq(bookcase) == 1;
     }
@@ -178,8 +177,10 @@ public class LibraryService {
 
         BookDTO book = new BookDTO();
         book.setBook_seq(book_seq);
-        book.setBookmark_order("[" + URLDecoder.decode(bookmark_order, "UTF-8") + "]");
+        book.setBookmark_order(bookmark_order);
+        book.setVideo_index(0);
 
+        bookDAO.updateIndexBySeq(book);
         return bookDAO.updateOrderBySeq(book) == 1;
     }
 

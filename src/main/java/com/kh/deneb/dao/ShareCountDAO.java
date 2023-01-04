@@ -1,6 +1,7 @@
 package com.kh.deneb.dao;
 
 import com.kh.deneb.dto.BookcaseDTO;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
@@ -15,4 +16,7 @@ public interface ShareCountDAO {
 
     @Insert("insert into share_count values(share_count_seq.nextval, #{bookcase_seq}, #{account_seq})")
     void insert(BookcaseDTO bookcase);
+
+    @Delete("delete share_count where parent_bookcase_seq = #{value}")
+    void deleteBySeq(int bookcase_seq);
 }

@@ -9,6 +9,7 @@ import com.kh.deneb.dto.BookmarkDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 @Service
@@ -22,7 +23,7 @@ public class BookmarkService {
     @Autowired
     LibraryService libraryService;
 
-    public BookmarkDTO createBookmark(BookmarkDTO bookmark) throws JsonProcessingException {
+    public BookmarkDTO createBookmark(BookmarkDTO bookmark) throws JsonProcessingException, UnsupportedEncodingException {
         int bookmark_seq = bookmarkDAO.selectNextSeq();
         int parent_book_seq = bookmark.getParent_book_seq();
 
@@ -55,5 +56,9 @@ public class BookmarkService {
     public BookmarkDTO moveBookmark(BookmarkDTO bookmark) {
         bookmarkDAO.updateParentBySeq(bookmark);
         return bookmarkDAO.selectAllBySeq(bookmark.getBookmark_seq());
+    }
+
+    public int editVideoTime(BookmarkDTO bookmark) {
+        return bookmarkDAO.updateVideoTimeBySeq(bookmark);
     }
 }

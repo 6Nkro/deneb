@@ -10,4 +10,8 @@ public class BookmarkDTO {
     String bookmark_url;
     String bookmark_memo;
     String bookmark_icon;
+    String video_id;
+    String video_title;
+    String video_channel;
+    int video_time;
 }

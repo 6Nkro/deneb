@@ -179,21 +179,33 @@ export default {
         bookcase_name: this.onlyCode ? this.bookcase.bookcase_name : this.bookcase_name,
         share_public: this.onlyCode ? 'N' : 'Y',
         share_contents: this.onlyCode ? '-' : this.share_contents,
-        share_tag: this.onlyCode ? '-' : encodeURIComponent(JSON.stringify(this.tags))
+        share_tag: this.onlyCode ? '-' : JSON.stringify(this.tags)
       }
       const res = await this.$axios.post(url, null, { params })
       if (!res.data) {
         return false
       }
-      // this.$store.commit('addBook', {
-      //   book: res.data,
-      //   bookcaseIndex: this.bookcaseIndex
-      // })
       this.close()
       const data = {
         icon: 'success',
-        html: '<strong>' + res.data.bookcase.share_code + '</strong>' +
-          '<br><br>코드는 <a href="/">공유함<a>에서 다시 확인할 수 있어요.'
+        html: `
+        <input
+        type="text"
+        value="${res.data.bookcase.share_code}"
+        style="
+        text-align: center;
+        height: 2rem;
+        font-weight: bold;
+        font-size: large;
+        border: 0;
+        background-color: #E8E8E8;
+        outline: none;
+        cursor: pointer;"
+        onclick="this.select()
+        document.execCommand('Copy')
+        this.setSelectionRange(0, 0)"
+        readonly>
+        <br><br>코드는 <a href="/myshare">공유함<a>에서 다시 확인할 수 있어요.`
       }
       this.$swal.fire(data)
     }

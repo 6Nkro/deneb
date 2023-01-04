@@ -42,4 +42,7 @@ public interface AccountDAO {
 
     @Update("update account set bookcase_order = #{bookcase_order} where account_seq = #{account_seq}")
     int updateOrderBySeq(AccountDTO account);
+
+    @Select("select account_seq from account where user_name = #{value}")
+    String selectSeqByName(String user_name);
 }
