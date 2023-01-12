@@ -46,6 +46,7 @@
       </v-card-text>
 
       <v-slide-group
+        style="height:56px"
         class="py-3"
         show-arrows>
         <v-slide-group-item
@@ -68,7 +69,7 @@
 
         </div>
 
-        <div class="d-flex w-50 align-center">
+        <div class="d-flex w-50 align-end">
           <div class="ml-auto px-3">
             <v-icon
               class="ml-3 mr-1"

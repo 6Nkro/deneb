@@ -11,7 +11,7 @@
           @focusout="editName"
           @keydown.enter="editName"
           @keydown.esc="escapeEdit"
-          maxlength="20">
+          maxlength="12">
       </div>
 
       <div class="title-button-group">

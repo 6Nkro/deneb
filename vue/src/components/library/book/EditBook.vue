@@ -29,21 +29,21 @@
 
       <v-radio-group
         readonly
+        inline
         class="mb-3"
         v-model="book_type"
-        inline
         hide-details>
 
         <v-row>
-          <v-col cols="6" class="text-end">
+          <v-col cols="12">
             <v-radio
+              v-if="book_type === 'Bookmark'"
               label="북마크 북"
               value="Bookmark"
               color="indigo"/>
-          </v-col>
 
-          <v-col cols="6" class="text-start">
             <v-radio
+              v-if="book_type === 'Video'"
               label="비디오 북"
               value="Video"
               color="indigo"/>

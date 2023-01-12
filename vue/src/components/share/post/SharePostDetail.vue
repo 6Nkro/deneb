@@ -101,45 +101,41 @@
 
       <div class="justify-center">
 
-        <hr class="my-3">
+        <hr class="mt-3">
 
         <div v-if="replyList.length === 0">
-          아직 등록된 댓글이 없어요.
-          <hr class="mt-3">
+          <div class=py-3>
+            아직 등록된 댓글이 없어요.
+          </div>
+          <hr>
         </div>
 
         <div v-if="replyList.length > 0">
-          <v-row
-            v-for="item in replyList"
-            :key="item.reply_seq">
-
-            <v-col cols="2" class="text-start">
-            <span class="reply-name">
-              {{ item.user_name }}
-            </span>
-            </v-col>
-            <v-col cols="8" class="text-start">
-            <span class="reply-contents">
-              {{ item.reply_contents }}
-            </span>
-            </v-col>
-            <v-col cols="2" class="text-end align-center">
-            <span class="reply-date">
-              {{ getPostDateFormat(item.write_date) }}
-            </span>
-              <v-icon
-                class="pointer"
-                v-if="this.$store.state.accountStore.account.account_seq === item.account_seq"
-                icon="mdi-close"
-                size="x-small"
-                color="red-lighten-3"
-                @click="deleteReply(item.reply_seq)"/>
-            </v-col>
-            <v-col cols="12">
-              <hr>
-            </v-col>
-
-          </v-row>
+          <div
+            v-for="(item, index) in replyList"
+            :key="index">
+            <div class="py-4 d-flex align-center">
+              <div style="width:15%" class="reply-name text-truncate text-start px-1">
+                {{ item.user_name }}
+              </div>
+              <div style="width:70%" class="reply-contents text-start px-1">
+                {{ item.reply_contents }}
+              </div>
+              <div style="width:15%" class="text-end px-1">
+                <span class="reply-date">
+                  {{ getPostDateFormat(item.write_date) }}
+                </span>
+                <v-icon
+                  class="pointer"
+                  v-if="this.$store.state.accountStore.account.account_seq === item.account_seq"
+                  icon="mdi-close"
+                  size="x-small"
+                  color="red-lighten-3"
+                  @click="deleteReply(item.reply_seq)"/>
+              </div>
+            </div>
+            <hr>
+          </div>
         </div>
 
       </div>

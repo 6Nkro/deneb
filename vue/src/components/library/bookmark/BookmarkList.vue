@@ -180,7 +180,7 @@ export default {
       const url = '/bookmark/order'
       const params = {
         book_seq: this.book.book_seq,
-        bookmark_order: order
+        bookmark_order: JSON.stringify(order)
       }
       await this.$axios.post(url, null, { params })
       const data = {

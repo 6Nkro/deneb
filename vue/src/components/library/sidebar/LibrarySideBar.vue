@@ -74,7 +74,7 @@ export default {
         const params = {
           user_email: this.$store.state.accountStore.account.user_email,
           user_pw: this.$store.state.accountStore.account.user_pw,
-          bookcase_order: order
+          bookcase_order: JSON.stringify(order)
         }
         this.$axios.post(url, null, { params })
         this.$store.commit('editBookcaseOrder', value)

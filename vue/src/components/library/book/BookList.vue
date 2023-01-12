@@ -128,7 +128,7 @@ export default {
         const url = '/book/order'
         const params = {
           bookcase_seq: this.bookcase.bookcase_seq,
-          book_order: order
+          book_order: JSON.stringify(order)
         }
         this.$axios.post(url, null, { params })
         this.$store.commit('editBookOrder', {

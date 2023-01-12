@@ -53,6 +53,7 @@ export default {
     this.$store.commit('refresh', res.data)
     if (this.$route.query.recent !== undefined) {
       this.bookcase = this.$store.state.bookStore.library[res.data.length - 1]
+      this.bookcaseIndex = res.data.length - 1
     }
     this.loadComplete = true
   },
