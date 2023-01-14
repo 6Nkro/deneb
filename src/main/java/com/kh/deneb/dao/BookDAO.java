@@ -4,6 +4,7 @@ import com.kh.deneb.dto.BookDTO;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashMap;
 import java.util.List;
 
 @Mapper
@@ -48,4 +49,7 @@ public interface BookDAO {
 
     @Update("update book set video_index = #{video_index} where book_seq = #{book_seq}")
     int updateIndexBySeq(BookDTO book);
+
+    @Select("select * from book where parent_bookcase_seq in (${parent_bookcase_seq}) order by decode (book_seq ${order})")
+    List<BookDTO> selectAllByParent(HashMap<String, Object> params);
 }

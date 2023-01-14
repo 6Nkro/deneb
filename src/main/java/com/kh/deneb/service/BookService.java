@@ -43,11 +43,7 @@ public class BookService {
         return libraryService.getBook(book_seq);
     }
 
-    public boolean editBookState(int book_seq, char book_open) {
-        BookDTO book = new BookDTO();
-        book.setBook_seq(book_seq);
-        book.setBook_open(book_open);
-
+    public boolean editBookState(BookDTO book) {
         return bookDAO.updateStateBySeq(book) == 1;
     }
 

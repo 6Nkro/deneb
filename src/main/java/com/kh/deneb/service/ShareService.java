@@ -40,13 +40,6 @@ public class ShareService {
     @Autowired
     LibraryService libraryService;
 
-    public int getAccountSeq(String user_email, String encrypted_pw) {
-        HashMap<String, Object> account = new HashMap<>();
-        account.put("user_email", user_email);
-        account.put("encrypted_pw", encrypted_pw);
-        return accountDAO.selectSeqByEmailAndPw(account);
-    }
-
     @Transactional
     public HashMap<String, Object> createSharePost(int origin_seq, SubBookcaseDTO subBookcase) throws UnsupportedEncodingException, JsonProcessingException {
 
@@ -101,9 +94,7 @@ public class ShareService {
         return data;
     }
 
-    public List<HashMap<String, Object>> getSubBookcaseList(String user_email, String encrypted_pw) throws JsonProcessingException {
-        int account_seq = getAccountSeq(user_email, encrypted_pw);
-
+    public List<HashMap<String, Object>> getSubBookcaseList(int account_seq) throws JsonProcessingException {
         ArrayList<Integer> order = subBookcaseDAO.selectSeqByParent(account_seq);
 
         List<HashMap<String, Object>> bookcaseList = new ArrayList<>();
@@ -142,7 +133,7 @@ public class ShareService {
     }
 
     @Transactional
-    public HashMap<String, Object> getSharePost(String user_email, String user_pw, String share_code) throws JsonProcessingException {
+    public HashMap<String, Object> getSharePost(int account_seq, String share_code) throws JsonProcessingException {
 
         SubBookcaseDTO subBookcase = subBookcaseDAO.selectAllByShareCode(share_code);
         if (subBookcaseDAO.selectAllByShareCode(share_code) == null) {
@@ -180,7 +171,6 @@ public class ShareService {
             book_order.add(book_seq);
         }
 
-        int account_seq = getAccountSeq(user_email, user_pw);
         BookcaseDTO bookcase = new BookcaseDTO();
         bookcase.setBookcase_seq(bookcase_seq);
         bookcase.setAccount_seq(account_seq);
@@ -248,16 +238,8 @@ public class ShareService {
         return postList;
     }
 
-    public int getLikeCount(String user_email, String user_pw, int bookcase_seq, boolean like_already) {
-
-        BookcaseDTO bookcase = new BookcaseDTO();
-
-        bookcase.setAccount_seq(getAccountSeq(user_email, user_pw));
-        bookcase.setBookcase_seq(bookcase_seq);
-
-        int result = like_already ? likeCountDAO.delete(bookcase) : likeCountDAO.insert(bookcase);
-
-        return result;
+    public int getLikeCount(BookcaseDTO bookcase, boolean like_already) {
+        return like_already ? likeCountDAO.delete(bookcase) : likeCountDAO.insert(bookcase);
     }
 
     public HashMap<String, Object> getPostDetail(BookcaseDTO bookcase) throws JsonProcessingException {

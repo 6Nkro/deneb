@@ -51,7 +51,7 @@ public class AccountService {
 
         HashMap<String, Object> data = new HashMap<>();
         data.put("account", account);
-        data.put("library", libraryService.getBookcaseList(account.getUser_email(), account.getUser_pw()));
+        data.put("library", libraryService.getBookcaseList(account.getAccount_seq()));
 
         return data;
     }
@@ -76,7 +76,7 @@ public class AccountService {
 
         HashMap<String, Object> data = new HashMap<>();
         data.put("account", account);
-        data.put("library", libraryService.getBookcaseList(user_email, accountDTO.getUser_pw()));
+        data.put("library", libraryService.getBookcaseList(account.getAccount_seq()));
         return data;
     }
 }

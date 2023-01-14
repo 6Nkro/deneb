@@ -29,15 +29,15 @@ public class ShareController {
 
     @PostMapping("/import")
     @ResponseBody
-    public String importSharePost(String user_email, String user_pw, String share_code) throws JsonProcessingException {
-        return new Gson().toJson(shareService.getSharePost(user_email, user_pw, share_code));
+    public String importSharePost(int account_seq, String share_code) throws JsonProcessingException {
+        return new Gson().toJson(shareService.getSharePost(account_seq, share_code));
     }
 
 
     @PostMapping("/like")
     @ResponseBody
-    public int likePost(String user_email, String user_pw, int bookcase_seq, boolean like_already) {
-        return shareService.getLikeCount(user_email, user_pw, bookcase_seq, like_already);
+    public int likePost(BookcaseDTO bookcase, boolean like_already) {
+        return shareService.getLikeCount(bookcase, like_already);
     }
 
     @GetMapping("/list")

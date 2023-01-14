@@ -4,6 +4,9 @@ import com.kh.deneb.dto.BookcaseDTO;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashMap;
+import java.util.List;
+
 @Mapper
 @Repository
 public interface BookcaseDAO {
@@ -36,4 +39,7 @@ public interface BookcaseDAO {
 
     @Insert("insert into bookcase values (#{bookcase_seq}, #{account_seq}, #{bookcase_name}, #{book_order})")
     void insertClone(BookcaseDTO bookcase);
+
+    @Select("select * from bookcase where account_seq = #{account_seq} order by decode (bookcase_seq ${order})")
+    List<BookcaseDTO> selectAllByParent(HashMap<String, Object> params);
 }

@@ -3,6 +3,7 @@ package com.kh.deneb.controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.gson.Gson;
 import com.kh.deneb.dto.BookDTO;
+import com.kh.deneb.dto.BookcaseDTO;
 import com.kh.deneb.service.BookService;
 import com.kh.deneb.service.LibraryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,19 +45,19 @@ public class BookController {
 
     @PostMapping("/order")
     @ResponseBody
-    public boolean editBookOrder(int bookcase_seq, String book_order) throws UnsupportedEncodingException {
-        return libraryService.editBookOrder(bookcase_seq, book_order);
+    public boolean editBookOrder(BookcaseDTO bookcase) {
+        return libraryService.editBookOrder(bookcase);
     }
 
     @PostMapping("/state")
     @ResponseBody
-    public boolean editBookState(int book_seq, char book_open) {
-        return bookService.editBookState(book_seq, book_open);
+    public boolean editBookState(BookDTO book) {
+        return bookService.editBookState(book);
     }
 
     @PostMapping("/index")
     @ResponseBody
-    public int editBookState(BookDTO book) {
+    public int editBookIndex(BookDTO book) {
         return bookService.editBookIndex(book);
     }
 
@@ -68,7 +69,7 @@ public class BookController {
 
     @PostMapping("/move")
     @ResponseBody
-    public String moveBook(String user_email, String user_pw, int book_seq, int origin_seq, int destination_seq) throws JsonProcessingException {
-        return new Gson().toJson(libraryService.moveBook(user_email, user_pw, book_seq, origin_seq, destination_seq));
+    public String moveBook(int account_seq, int book_seq, int origin_seq, int destination_seq) throws JsonProcessingException {
+        return new Gson().toJson(libraryService.moveBook(account_seq, book_seq, origin_seq, destination_seq));
     }
 }

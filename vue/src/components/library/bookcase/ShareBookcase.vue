@@ -205,7 +205,7 @@ export default {
         document.execCommand('Copy')
         this.setSelectionRange(0, 0)"
         readonly>
-        <br><br>코드는 <a href="/myshare">공유함<a>에서 다시 확인할 수 있어요.`
+        <br><br>코드는 <a href="/account/myshare">공유함<a>에서 다시 확인할 수 있어요.`
       }
       this.$swal.fire(data)
     }

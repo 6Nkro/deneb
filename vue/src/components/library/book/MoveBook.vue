@@ -112,8 +112,7 @@ export default {
       this.loading = true
       const url = '/book/move'
       const params = {
-        user_email: this.$store.state.accountStore.account.user_email,
-        user_pw: this.$store.state.accountStore.account.user_pw,
+        account_seq: this.$store.state.accountStore.account.account_seq,
         book_seq: this.book.book_seq,
         origin_seq: this.bookcase.bookcase_seq,
         destination_seq: this.select.bookcase.bookcase_seq

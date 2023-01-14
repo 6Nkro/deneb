@@ -26,33 +26,26 @@ public class BookcaseService {
     LibraryService libraryService;
 
     @Transactional
-    public HashMap<String, Object> createBookcase(String user_email, String encrypted_pw, String bookcase_name) throws JsonProcessingException {
+    public HashMap<String, Object> createBookcase(BookcaseDTO bookcase) throws JsonProcessingException {
         int bookcase_seq = bookcaseDAO.selectNextSeq();
-        int account_seq = libraryService.getAccountSeq(user_email, encrypted_pw);
 
-        BookcaseDTO bookcase = new BookcaseDTO();
         bookcase.setBookcase_seq(bookcase_seq);
-        bookcase.setAccount_seq(account_seq);
-        bookcase.setBookcase_name(bookcase_name);
         bookcaseDAO.insert(bookcase);
 
         ObjectMapper mapper = new ObjectMapper();
-        ArrayList<Integer> order = mapper.readValue(accountDAO.selectBookcaseOrderBySeq(account_seq), ArrayList.class);
+        ArrayList<Integer> order = mapper.readValue(accountDAO.selectBookcaseOrderBySeq(bookcase.getAccount_seq()), ArrayList.class);
         order.add(bookcase_seq);
 
         AccountDTO account = new AccountDTO();
-        account.setAccount_seq(account_seq);
+        account.setAccount_seq(bookcase.getAccount_seq());
         account.setBookcase_order(String.valueOf(order));
         accountDAO.updateOrderBySeq(account);
 
         return libraryService.getBookcase(bookcase_seq);
     }
 
-    public BookcaseDTO editBookcase(int bookcase_seq, String bookcase_name) {
-        BookcaseDTO bookcase = new BookcaseDTO();
-        bookcase.setBookcase_seq(bookcase_seq);
-        bookcase.setBookcase_name(bookcase_name);
+    public BookcaseDTO editBookcase(BookcaseDTO bookcase) {
         bookcaseDAO.updateNameBySeq(bookcase);
-        return bookcaseDAO.selectAllBySeq(bookcase_seq);
+        return bookcaseDAO.selectAllBySeq(bookcase.getBookcase_seq());
     }
 }

@@ -110,8 +110,7 @@ export default {
       this.loading = true
       const url = this.inputCode ? '/share/import' : '/bookcase/create'
       const params = {
-        user_email: this.$store.state.accountStore.account.user_email,
-        user_pw: this.$store.state.accountStore.account.user_pw,
+        account_seq: this.$store.state.accountStore.account.account_seq,
         [this.inputCode ? 'share_code' : 'bookcase_name']: this.bookcase_name
       }
       const res = await this.$axios.post(url, null, { params })

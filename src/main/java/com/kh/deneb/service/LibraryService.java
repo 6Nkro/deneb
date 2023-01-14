@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,13 +30,6 @@ public class LibraryService {
     @Autowired
     BookmarkDAO bookmarkDAO;
 
-    public int getAccountSeq(String user_email, String encrypted_pw) {
-        HashMap<String, Object> account = new HashMap<>();
-        account.put("user_email", user_email);
-        account.put("encrypted_pw", encrypted_pw);
-        return accountDAO.selectSeqByEmailAndPw(account);
-    }
-
     public HashMap<String, Object> getBookcase(int bookcase_seq) throws JsonProcessingException {
         HashMap<String, Object> data = new HashMap<>();
         data.put("bookcase", bookcaseDAO.selectAllBySeq(bookcase_seq));
@@ -45,20 +37,105 @@ public class LibraryService {
         return data;
     }
 
-    public List<HashMap<String, Object>> getBookcaseList(String user_email, String encrypted_pw) throws JsonProcessingException {
-        int account_seq = getAccountSeq(user_email, encrypted_pw);
+    public List<HashMap<String, Object>> getBookcaseList(int account_seq) throws JsonProcessingException {
 
         ObjectMapper mapper = new ObjectMapper();
-        ArrayList<Integer> order = mapper.readValue(accountDAO.selectBookcaseOrderBySeq(account_seq), ArrayList.class);
+        ArrayList<Integer> bookcaseOrder = mapper.readValue(accountDAO.selectBookcaseOrderBySeq(account_seq), ArrayList.class);
 
-        List<HashMap<String, Object>> bookcaseList = new ArrayList<>();
-        for (int bookcase_seq : order) {
-            HashMap<String, Object> data = new HashMap<>();
-            data.put("bookcase", bookcaseDAO.selectAllBySeq(bookcase_seq));
-            data.put("bookList", getBookList(bookcase_seq));
-            bookcaseList.add(data);
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < bookcaseOrder.size(); i++) {
+            sb.append(",").append(bookcaseOrder.get(i)).append(",").append(i);
         }
-        return bookcaseList;
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("account_seq", account_seq);
+        params.put("order", sb);
+
+        List<BookcaseDTO> bookcaseList = bookcaseDAO.selectAllByParent(params);
+
+        sb.setLength(0);
+        int order = 0;
+        for (BookcaseDTO bookcase : bookcaseList) {
+            ArrayList<Integer> bookOrder = mapper.readValue(bookcase.getBook_order(), ArrayList.class);
+            if (bookOrder.size() > 0) {
+                for (int book_seq : bookOrder) {
+                    sb.append(",").append(book_seq).append(",").append(order);
+                    order++;
+                }
+            }
+        }
+
+        List<BookDTO> allBookList = new ArrayList<>();
+        if (sb.length() > 0) {
+            params.clear();
+            params.put("parent_bookcase_seq", bookcaseOrder.toString()
+                    .replace("[", "")
+                    .replace("]", ""));
+            params.put("order", sb);
+            allBookList = bookDAO.selectAllByParent(params);
+        }
+
+        sb.setLength(0);
+        order = 0;
+        for (BookDTO book : allBookList) {
+            ArrayList<Integer> bookmarkOrder = mapper.readValue(book.getBookmark_order(), ArrayList.class);
+            if (bookmarkOrder.size() > 0) {
+                for (int bookmark_seq : bookmarkOrder) {
+                    sb.append(",").append(bookmark_seq).append(",").append(order);
+                    order++;
+                }
+            }
+        }
+
+        List<BookmarkDTO> allBookmarkList = new ArrayList<>();
+        if (sb.length() > 0) {
+            StringBuilder bookOrder = new StringBuilder();
+            for (BookcaseDTO bookcase : bookcaseList) {
+                if (!bookcase.getBook_order().equals("[]")) {
+                    bookOrder.append(bookcase.getBook_order()
+                            .replace("[", "")
+                            .replace("]", "")).append(",");
+                }
+            }
+            if (bookOrder.charAt(bookOrder.length() - 1) == ',') {
+                bookOrder.setLength(bookOrder.length() - 1);
+            }
+            params.clear();
+            params.put("parent_book_seq", bookOrder);
+            params.put("order", sb);
+            allBookmarkList = bookmarkDAO.selectAllByParent(params);
+        }
+
+        List<HashMap<String, Object>> bookcaseMapList = new ArrayList<>();
+        int bookIndex = 0;
+        int bookmarkIndex = 0;
+        for (BookcaseDTO bookcase : bookcaseList) {
+            HashMap<String, Object> bookcaseMap = new HashMap<>();
+            List<HashMap<String, Object>> bookMapList = new ArrayList<>();
+            for (int j = bookIndex; j < allBookList.size(); j++) {
+                if (bookcase.getBookcase_seq() != allBookList.get(j).getParent_bookcase_seq()) {
+                    break;
+                }
+                HashMap<String, Object> bookMap = new HashMap<>();
+                List<BookmarkDTO> bookmarkList = new ArrayList<>();
+                for (int i = bookmarkIndex; i < allBookmarkList.size(); i++) {
+                    if (allBookList.get(j).getBook_seq() == allBookmarkList.get(i).getParent_book_seq()) {
+                        bookmarkList.add(allBookmarkList.get(i));
+                    } else {
+                        break;
+                    }
+                    bookmarkIndex++;
+                }
+                bookMap.put("book", allBookList.get(j));
+                bookMap.put("bookmarkList", bookmarkList);
+                bookMapList.add(bookMap);
+                bookIndex++;
+            }
+            bookcaseMap.put("bookcase", bookcase);
+            bookcaseMap.put("bookList", bookMapList);
+            bookcaseMapList.add(bookcaseMap);
+        }
+        return bookcaseMapList;
     }
 
     public HashMap<String, Object> getBook(int book_seq) throws JsonProcessingException {
@@ -70,16 +147,59 @@ public class LibraryService {
 
     public List<HashMap<String, Object>> getBookList(int parent_bookcase_seq) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
-        ArrayList<Integer> order = mapper.readValue(bookcaseDAO.selectBookOrderBySeq(parent_bookcase_seq), ArrayList.class);
+        ArrayList<Integer> bookOrder = mapper.readValue(bookcaseDAO.selectBookOrderBySeq(parent_bookcase_seq), ArrayList.class);
 
-        List<HashMap<String, Object>> bookList = new ArrayList<>();
-        for (int book_seq : order) {
-            HashMap<String, Object> data = new HashMap<>();
-            data.put("book", bookDAO.selectAllBySeq(book_seq));
-            data.put("bookmarkList", getBookmarkList(book_seq));
-            bookList.add(data);
+        List<BookDTO> bookList = new ArrayList<>();
+        if (bookOrder.size() > 0) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < bookOrder.size(); i++) {
+                sb.append(",").append(bookOrder.get(i)).append(",").append(i);
+            }
+            HashMap<String, Object> params = new HashMap<>();
+            params.put("parent_bookcase_seq", parent_bookcase_seq);
+            params.put("order", sb);
+
+            bookList = bookDAO.selectAllByParent(params);
         }
-        return bookList;
+
+        StringBuilder sb = new StringBuilder();
+        for (BookDTO book : bookList) {
+            ArrayList<Integer> bookmarkOrder = mapper.readValue(book.getBookmark_order(), ArrayList.class);
+            if (bookmarkOrder.size() > 0) {
+                for (int i = 0; i < bookmarkOrder.size(); i++) {
+                    sb.append(",").append(bookmarkOrder.get(i)).append(",").append(i);
+                }
+            }
+        }
+
+        List<BookmarkDTO> allBookmarkList = new ArrayList<>();
+        if (sb.length() > 0) {
+            HashMap<String, Object> params = new HashMap<>();
+            params.put("parent_book_seq", bookOrder.toString()
+                    .replace("[", "")
+                    .replace("]", ""));
+            params.put("order", sb);
+            allBookmarkList = bookmarkDAO.selectAllByParent(params);
+        }
+
+        List<HashMap<String, Object>> bookMapList = new ArrayList<>();
+        int bookmarkIndex = 0;
+        for (BookDTO book : bookList) {
+            HashMap<String, Object> data = new HashMap<>();
+            List<BookmarkDTO> bookmarkList = new ArrayList<>();
+            for (int i = bookmarkIndex; i < allBookmarkList.size(); i++) {
+                if (book.getBook_seq() == allBookmarkList.get(i).getParent_book_seq()) {
+                    bookmarkList.add(allBookmarkList.get(i));
+                } else {
+                    break;
+                }
+                bookmarkIndex++;
+            }
+            data.put("book", book);
+            data.put("bookmarkList", bookmarkList);
+            bookMapList.add(data);
+        }
+        return bookMapList;
     }
 
     public BookmarkDTO getBookmark(int bookmark_seq) {
@@ -88,12 +208,21 @@ public class LibraryService {
 
     public List<BookmarkDTO> getBookmarkList(int parent_book_seq) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
-        ArrayList<Integer> order = mapper.readValue(bookDAO.selectBookmarkOrderBySeq(parent_book_seq), ArrayList.class);
+        ArrayList<Integer> bookmarkorder = mapper.readValue(bookDAO.selectBookmarkOrderBySeq(parent_book_seq), ArrayList.class);
 
         List<BookmarkDTO> bookmarkList = new ArrayList<>();
-        for (int bookmark_seq : order) {
-            bookmarkList.add(bookmarkDAO.selectAllBySeq(bookmark_seq));
+        if (bookmarkorder.size() > 0) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < bookmarkorder.size(); i++) {
+                sb.append(",").append(bookmarkorder.get(i)).append(",").append(i);
+            }
+            HashMap<String, Object> params = new HashMap<>();
+            params.put("parent_book_seq", parent_book_seq);
+            params.put("order", sb);
+
+            bookmarkList = bookmarkDAO.selectAllByParent(params);
         }
+
         return bookmarkList;
     }
 
@@ -154,38 +283,23 @@ public class LibraryService {
         return bookmarkDAO.deleteBySeq(bookmark_seq) == 1 && bookDAO.updateOrderBySeq(book) == 1;
     }
 
-    public boolean editBookcaseOrder(String user_email, String encrypted_pw, String bookcase_order) throws UnsupportedEncodingException {
-
-        AccountDTO account = new AccountDTO();
-        account.setAccount_seq(getAccountSeq(user_email, encrypted_pw));
-        account.setBookcase_order(bookcase_order);
-
+    public boolean editBookcaseOrder(AccountDTO account) {
         return accountDAO.updateOrderBySeq(account) == 1;
     }
 
-    public boolean editBookOrder(int bookcase_seq, String book_order) throws UnsupportedEncodingException {
-
-        BookcaseDTO bookcase = new BookcaseDTO();
-        bookcase.setBookcase_seq(bookcase_seq);
-        bookcase.setBook_order(book_order);
-
+    public boolean editBookOrder(BookcaseDTO bookcase) {
         return bookcaseDAO.updateOrderBySeq(bookcase) == 1;
     }
 
     @Transactional
-    public boolean editBookmarkOrder(int book_seq, String bookmark_order) throws UnsupportedEncodingException {
-
-        BookDTO book = new BookDTO();
-        book.setBook_seq(book_seq);
-        book.setBookmark_order(bookmark_order);
+    public boolean editBookmarkOrder(BookDTO book) {
         book.setVideo_index(0);
-
         bookDAO.updateIndexBySeq(book);
         return bookDAO.updateOrderBySeq(book) == 1;
     }
 
     @Transactional
-    public List<HashMap<String, Object>> moveBook(String user_email, String encrypted_pw, int book_seq, int origin_seq, int destination_seq) throws JsonProcessingException {
+    public List<HashMap<String, Object>> moveBook(int account_seq, int book_seq, int origin_seq, int destination_seq) throws JsonProcessingException {
 
         ObjectMapper mapper = new ObjectMapper();
         ArrayList<Integer> origin_order = mapper.readValue(bookcaseDAO.selectBookOrderBySeq(origin_seq), ArrayList.class);
@@ -206,6 +320,6 @@ public class LibraryService {
         book.setParent_bookcase_seq(destination_seq);
         bookDAO.updateParentBySeq(book);
 
-        return getBookcaseList(user_email, encrypted_pw);
+        return getBookcaseList(account_seq);
     }
 }

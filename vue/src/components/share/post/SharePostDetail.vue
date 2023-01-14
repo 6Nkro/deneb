@@ -221,8 +221,7 @@ export default {
       }
       const url = '/share/like'
       const params = {
-        user_email: this.$store.state.accountStore.account.user_email,
-        user_pw: this.$store.state.accountStore.account.user_pw,
+        account_seq: this.$store.state.accountStore.account.account_seq,
         bookcase_seq: this.post.bookcase_seq,
         like_already: this.like_already
       }
@@ -270,8 +269,7 @@ export default {
           if (result.isConfirmed) {
             const url = '/share/import'
             const params = {
-              user_email: this.$store.state.accountStore.account.user_email,
-              user_pw: this.$store.state.accountStore.account.user_pw,
+              account_seq: this.$store.state.accountStore.account.account_seq,
               share_code: this.post.share_code
             }
             const res = await this.$axios.post(url, null, { params })

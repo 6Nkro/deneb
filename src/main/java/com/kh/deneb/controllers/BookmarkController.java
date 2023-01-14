@@ -2,6 +2,7 @@ package com.kh.deneb.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.gson.Gson;
+import com.kh.deneb.dto.BookDTO;
 import com.kh.deneb.dto.BookmarkDTO;
 import com.kh.deneb.service.BookmarkService;
 import com.kh.deneb.service.LibraryService;
@@ -38,8 +39,8 @@ public class BookmarkController {
 
     @PostMapping("/order")
     @ResponseBody
-    public boolean editBookOrder(int book_seq, String bookmark_order) throws UnsupportedEncodingException {
-        return libraryService.editBookmarkOrder(book_seq, bookmark_order);
+    public boolean editBookOrder(BookDTO book) {
+        return libraryService.editBookmarkOrder(book);
     }
 
     @PostMapping("/move")

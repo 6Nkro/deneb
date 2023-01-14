@@ -72,8 +72,7 @@ export default {
         })
         const url = '/bookcase/order'
         const params = {
-          user_email: this.$store.state.accountStore.account.user_email,
-          user_pw: this.$store.state.accountStore.account.user_pw,
+          account_seq: this.$store.state.accountStore.account.account_seq,
           bookcase_order: JSON.stringify(order)
         }
         this.$axios.post(url, null, { params })
