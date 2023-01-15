@@ -44,8 +44,8 @@ public interface BookDAO {
     @Update("update book set parent_bookcase_seq = #{parent_bookcase_seq} where book_seq = #{book_seq}")
     void updateParentBySeq(BookDTO book);
 
-    @Insert("insert into book values (#{book_seq}, #{parent_bookcase_seq}, #{book_name}, #{book_color}, #{book_icon}, #{book_icon_color}, #{book_type}, 0, 'Y', #{bookmark_order})")
-    void insertClone(BookDTO book);
+    @Insert("insert into book (book_seq, parent_bookcase_seq, book_name, book_color, book_icon, book_icon_color, book_type, video_index, book_open, bookmark_order) ${value}")
+    void insertAll(String params);
 
     @Update("update book set video_index = #{video_index} where book_seq = #{book_seq}")
     int updateIndexBySeq(BookDTO book);

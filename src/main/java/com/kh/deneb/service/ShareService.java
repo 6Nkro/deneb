@@ -40,7 +40,6 @@ public class ShareService {
     @Autowired
     LibraryService libraryService;
 
-    @Transactional
     public HashMap<String, Object> createSharePost(int origin_seq, SubBookcaseDTO subBookcase) throws UnsupportedEncodingException, JsonProcessingException {
 
         int sub_bookcase_seq = subBookcaseDAO.selectNextSeq();
@@ -49,30 +48,86 @@ public class ShareService {
         ArrayList<Integer> book_order = mapper.readValue(bookcaseDAO.selectBookOrderBySeq(origin_seq), ArrayList.class);
         ArrayList<Integer> sub_book_order = new ArrayList<>();
 
-        for (int book_seq : book_order) {
-            BookDTO subBook = bookDAO.selectAllBySeq(book_seq);
+        List<BookmarkDTO> sub_bookmarkListAll = new ArrayList<>();
+
+        List<BookDTO> sub_bookList;
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < book_order.size(); i++) {
+            sb.append(",").append(book_order.get(i)).append(",").append(i);
+        }
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("parent_bookcase_seq", origin_seq);
+        params.put("order", sb);
+
+        sub_bookList = bookDAO.selectAllByParent(params);
+
+        for (BookDTO sub_book : sub_bookList) {
+            int book_seq = sub_book.getBook_seq();
+            int sub_book_seq = subBookDAO.selectNextSeq();
 
             ArrayList<Integer> bookmark_order = mapper.readValue(bookDAO.selectBookmarkOrderBySeq(book_seq), ArrayList.class);
             ArrayList<Integer> sub_bookmark_order = new ArrayList<>();
-            int sub_book_seq = subBookDAO.selectNextSeq();
 
-            for (int bookmark_seq : bookmark_order) {
-                BookmarkDTO subBookmark = bookmarkDAO.selectAllBySeq(bookmark_seq);
+            List<BookmarkDTO> sub_bookmarkList = new ArrayList<>();
+            if (bookmark_order.size() > 0) {
+                sb.setLength(0);
+                for (int i = 0; i < bookmark_order.size(); i++) {
+                    sb.append(",").append(bookmark_order.get(i)).append(",").append(i);
+                }
+                params.clear();
+                params.put("parent_book_seq", book_seq);
+                params.put("order", sb);
 
-                int sub_bookmark_seq = subBookmarkDAO.selectNextSeq();
-
-                subBookmark.setBookmark_seq(sub_bookmark_seq);
-                subBookmark.setParent_book_seq(sub_book_seq);
-                subBookmarkDAO.insert(subBookmark);
-                sub_bookmark_order.add(sub_bookmark_seq);
+                sub_bookmarkList = bookmarkDAO.selectAllByParent(params);
             }
 
-            subBook.setBook_seq(sub_book_seq);
-            subBook.setParent_bookcase_seq(sub_bookcase_seq);
-            subBook.setBookmark_order(sub_bookmark_order.toString());
-            subBookDAO.insert(subBook);
+            for (BookmarkDTO sub_bookmark : sub_bookmarkList) {
+                int sub_bookmark_seq = subBookmarkDAO.selectNextSeq();
+                sub_bookmark.setBookmark_seq(sub_bookmark_seq);
+                sub_bookmark.setParent_book_seq(sub_book_seq);
+                sub_bookmark_order.add(sub_bookmark_seq);
+                sub_bookmarkListAll.add(sub_bookmark);
+            }
+
+            sub_book.setBook_seq(sub_book_seq);
+            sub_book.setParent_bookcase_seq(sub_bookcase_seq);
+            sub_book.setBookmark_order(sub_bookmark_order.toString());
             sub_book_order.add(sub_book_seq);
         }
+
+        if (sub_bookmarkListAll.size() > 0) {
+            sb.setLength(0);
+            for (BookmarkDTO sub_bookmark : sub_bookmarkListAll) {
+                sb.append("select ")
+                        .append(sub_bookmark.getBookmark_seq()).append(",")
+                        .append(sub_bookmark.getParent_book_seq()).append(",")
+                        .append("'").append(sub_bookmark.getBookmark_name()).append("',")
+                        .append("'").append(sub_bookmark.getBookmark_url()).append("',")
+                        .append("'").append(sub_bookmark.getBookmark_memo()).append("',")
+                        .append("'").append(sub_bookmark.getVideo_id()).append("',")
+                        .append("'").append(sub_bookmark.getVideo_title()).append("',")
+                        .append("'").append(sub_bookmark.getVideo_channel()).append("' ")
+                        .append("from dual union all ");
+            }
+            sb.setLength((sb.length() - 11));
+            subBookmarkDAO.insertAll(sb.toString());
+        }
+
+        sb.setLength(0);
+        for (BookDTO sub_book : sub_bookList) {
+            sb.append("select ")
+                    .append(sub_book.getBook_seq()).append(",")
+                    .append(sub_book.getParent_bookcase_seq()).append(",")
+                    .append("'").append(sub_book.getBook_name()).append("',")
+                    .append("'").append(sub_book.getBook_color()).append("',")
+                    .append("'").append(sub_book.getBook_icon()).append("',")
+                    .append("'").append(sub_book.getBook_icon_color()).append("',")
+                    .append("'").append(sub_book.getBook_type()).append("',")
+                    .append("'").append(sub_book.getBookmark_order()).append("' ")
+                    .append("from dual union all ");
+        }
+        sb.setLength((sb.length() - 11));
+        subBookDAO.insertAll(sb.toString());
 
         subBookcase.setBookcase_seq(sub_bookcase_seq);
         subBookcase.setBook_order(sub_book_order.toString());
@@ -94,45 +149,64 @@ public class ShareService {
         return data;
     }
 
-    public List<HashMap<String, Object>> getSubBookcaseList(int account_seq) throws JsonProcessingException {
-        ArrayList<Integer> order = subBookcaseDAO.selectSeqByParent(account_seq);
-
-        List<HashMap<String, Object>> bookcaseList = new ArrayList<>();
-        for (int bookcase_seq : order) {
-            HashMap<String, Object> data = new HashMap<>();
-            data.put("bookcase", subBookcaseDAO.selectAllBySeq(bookcase_seq));
-            data.put("bookList", getSubBookList(bookcase_seq));
-            bookcaseList.add(data);
-        }
-        return bookcaseList;
-    }
-
     public List<HashMap<String, Object>> getSubBookList(int parent_bookcase_seq) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
-        ArrayList<Integer> order = mapper.readValue(subBookcaseDAO.selectBookOrderBySeq(parent_bookcase_seq), ArrayList.class);
+        ArrayList<Integer> bookOrder = mapper.readValue(subBookcaseDAO.selectBookOrderBySeq(parent_bookcase_seq), ArrayList.class);
 
-        List<HashMap<String, Object>> bookList = new ArrayList<>();
-        for (int book_seq : order) {
+        List<BookDTO> bookList = new ArrayList<>();
+        if (bookOrder.size() > 0) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < bookOrder.size(); i++) {
+                sb.append(",").append(bookOrder.get(i)).append(",").append(i);
+            }
+            HashMap<String, Object> params = new HashMap<>();
+            params.put("parent_bookcase_seq", parent_bookcase_seq);
+            params.put("order", sb);
+
+            bookList = subBookDAO.selectAllByParent(params);
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (BookDTO book : bookList) {
+            ArrayList<Integer> bookmarkOrder = mapper.readValue(book.getBookmark_order(), ArrayList.class);
+            if (bookmarkOrder.size() > 0) {
+                for (int i = 0; i < bookmarkOrder.size(); i++) {
+                    sb.append(",").append(bookmarkOrder.get(i)).append(",").append(i);
+                }
+            }
+        }
+
+        List<BookmarkDTO> allBookmarkList = new ArrayList<>();
+        if (sb.length() > 0) {
+            HashMap<String, Object> params = new HashMap<>();
+            params.put("parent_book_seq", bookOrder.toString()
+                    .replace("[", "")
+                    .replace("]", ""));
+            params.put("order", sb);
+            allBookmarkList = subBookmarkDAO.selectAllByParent(params);
+        }
+
+
+        List<HashMap<String, Object>> bookMapList = new ArrayList<>();
+        int bookmarkIndex = 0;
+        for (BookDTO book : bookList) {
             HashMap<String, Object> data = new HashMap<>();
-            data.put("book", subBookDAO.selectAllBySeq(book_seq));
-            data.put("bookmarkList", getSubBookmarkList(book_seq));
-            bookList.add(data);
+            List<BookmarkDTO> bookmarkList = new ArrayList<>();
+            for (int i = bookmarkIndex; i < allBookmarkList.size(); i++) {
+                if (book.getBook_seq() == allBookmarkList.get(i).getParent_book_seq()) {
+                    bookmarkList.add(allBookmarkList.get(i));
+                } else {
+                    break;
+                }
+                bookmarkIndex++;
+            }
+            data.put("book", book);
+            data.put("bookmarkList", bookmarkList);
+            bookMapList.add(data);
         }
-        return bookList;
+        return bookMapList;
     }
 
-    public List<BookmarkDTO> getSubBookmarkList(int parent_book_seq) throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        ArrayList<Integer> order = mapper.readValue(subBookDAO.selectBookmarkOrderBySeq(parent_book_seq), ArrayList.class);
-
-        List<BookmarkDTO> bookmarkList = new ArrayList<>();
-        for (int bookmark_seq : order) {
-            bookmarkList.add(subBookmarkDAO.selectAllBySeq(bookmark_seq));
-        }
-        return bookmarkList;
-    }
-
-    @Transactional
     public HashMap<String, Object> getSharePost(int account_seq, String share_code) throws JsonProcessingException {
 
         SubBookcaseDTO subBookcase = subBookcaseDAO.selectAllByShareCode(share_code);
@@ -143,33 +217,93 @@ public class ShareService {
         int bookcase_seq = bookcaseDAO.selectNextSeq();
 
         ObjectMapper mapper = new ObjectMapper();
-        ArrayList<Integer> sub_book_order = mapper.readValue(subBookcase.getBook_order(), ArrayList.class);
+        ArrayList<Integer> sub_book_order = mapper.readValue(subBookcaseDAO.selectBookOrderBySeq(subBookcase.getBookcase_seq()), ArrayList.class);
         ArrayList<Integer> book_order = new ArrayList<>();
 
-        for (int sub_book_seq : sub_book_order) {
-            BookDTO Book = subBookDAO.selectAllBySeq(sub_book_seq);
+        List<BookmarkDTO> bookmarkListAll = new ArrayList<>();
+
+        List<BookDTO> bookList;
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < sub_book_order.size(); i++) {
+            sb.append(",").append(sub_book_order.get(i)).append(",").append(i);
+        }
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("parent_bookcase_seq", subBookcase.getBookcase_seq());
+        params.put("order", sb);
+
+
+        bookList = subBookDAO.selectAllByParent(params);
+
+        for (BookDTO book : bookList) {
+            int sub_book_seq = book.getBook_seq();
+            int book_seq = bookDAO.selectNextSeq();
 
             ArrayList<Integer> sub_bookmark_order = mapper.readValue(subBookDAO.selectBookmarkOrderBySeq(sub_book_seq), ArrayList.class);
             ArrayList<Integer> bookmark_order = new ArrayList<>();
-            int book_seq = bookDAO.selectNextSeq();
 
-            for (int sub_bookmark_seq : sub_bookmark_order) {
-                BookmarkDTO Bookmark = subBookmarkDAO.selectAllBySeq(sub_bookmark_seq);
+            List<BookmarkDTO> bookmarkList = new ArrayList<>();
+            if (sub_bookmark_order.size() > 0) {
+                sb.setLength(0);
+                for (int i = 0; i < sub_bookmark_order.size(); i++) {
+                    sb.append(",").append(sub_bookmark_order.get(i)).append(",").append(i);
+                }
+                params.clear();
+                params.put("parent_book_seq", sub_book_seq);
+                params.put("order", sb);
 
-                int bookmark_seq = bookmarkDAO.selectNextSeq();
-
-                Bookmark.setBookmark_seq(bookmark_seq);
-                Bookmark.setParent_book_seq(book_seq);
-                bookmarkDAO.insert(Bookmark);
-                bookmark_order.add(bookmark_seq);
+                bookmarkList = subBookmarkDAO.selectAllByParent(params);
             }
 
-            Book.setBook_seq(book_seq);
-            Book.setParent_bookcase_seq(bookcase_seq);
-            Book.setBookmark_order(bookmark_order.toString());
-            bookDAO.insertClone(Book);
+            for (BookmarkDTO bookmark : bookmarkList) {
+                int bookmark_seq = bookmarkDAO.selectNextSeq();
+                bookmark.setBookmark_seq(bookmark_seq);
+                bookmark.setParent_book_seq(book_seq);
+                bookmark_order.add(bookmark_seq);
+                bookmarkListAll.add(bookmark);
+            }
+
+            book.setBook_seq(book_seq);
+            book.setParent_bookcase_seq(bookcase_seq);
+            book.setBookmark_order(bookmark_order.toString());
             book_order.add(book_seq);
         }
+
+        if (bookmarkListAll.size() > 0) {
+            sb.setLength(0);
+            for (BookmarkDTO bookmark : bookmarkListAll) {
+                sb.append("select ")
+                        .append(bookmark.getBookmark_seq()).append(",")
+                        .append(bookmark.getParent_book_seq()).append(",")
+                        .append("'").append(bookmark.getBookmark_name()).append("',")
+                        .append("'").append(bookmark.getBookmark_url()).append("',")
+                        .append("'").append(bookmark.getBookmark_memo()).append("',")
+                        .append("'").append(bookmark.getVideo_id()).append("',")
+                        .append("'").append(bookmark.getVideo_title()).append("',")
+                        .append("'").append(bookmark.getVideo_channel()).append("',")
+                        .append("0 ")
+                        .append("from dual union all ");
+            }
+            sb.setLength((sb.length() - 11));
+            bookmarkDAO.insertAll(sb.toString());
+        }
+
+        sb.setLength(0);
+        for (BookDTO book : bookList) {
+            sb.append("select ")
+                    .append(book.getBook_seq()).append(",")
+                    .append(book.getParent_bookcase_seq()).append(",")
+                    .append("'").append(book.getBook_name()).append("',")
+                    .append("'").append(book.getBook_color()).append("',")
+                    .append("'").append(book.getBook_icon()).append("',")
+                    .append("'").append(book.getBook_icon_color()).append("',")
+                    .append("'").append(book.getBook_type()).append("',")
+                    .append("0,")
+                    .append("'Y',")
+                    .append("'").append(book.getBookmark_order()).append("' ")
+                    .append("from dual union all ");
+        }
+        sb.setLength((sb.length() - 11));
+        bookDAO.insertAll(sb.toString());
 
         BookcaseDTO bookcase = new BookcaseDTO();
         bookcase.setBookcase_seq(bookcase_seq);
@@ -257,7 +391,7 @@ public class ShareService {
     }
 
     public List<SubBookcaseDTO> getChartList() {
-        return subBookcaseDAO.selectAllListByLikeCount();
+        return subBookcaseDAO.selectAllListSortByPopular();
     }
 
     @Transactional

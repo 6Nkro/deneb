@@ -43,4 +43,7 @@ public interface BookmarkDAO {
 
     @Select("select * from bookmark where parent_book_seq in (${parent_book_seq}) order by decode (bookmark_seq ${order})")
     List<BookmarkDTO> selectAllByParent(HashMap<String, Object> params);
+
+    @Insert("insert into bookmark (bookmark_seq, parent_book_seq, bookmark_name, bookmark_url, bookmark_memo, video_id, video_title, video_channel, video_time) ${value}")
+    void insertAll(String params);
 }

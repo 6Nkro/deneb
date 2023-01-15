@@ -99,15 +99,23 @@ public interface SubBookcaseDAO {
             "left join (select parent_bookcase_seq, count(*) reply_count " +
             "from share_reply group by parent_bookcase_seq) r " +
             "on b.bookcase_seq = r.parent_bookcase_seq " +
-            "where account_seq = #{value}")
+            "where account_seq = #{value} " +
+            "order by bookcase_seq desc")
     List<SubBookcaseDTO> selectAllListByAccountSeq(int account_seq);
 
-    @Select("select b.*, a.user_name, l.like_count, share_count, reply_count " +
-            "from (select sb.*, nvl(sl.like_count, 0) lc, row_number() over(order by sl.like_count) rn " +
+    @Select("select b.*, a.user_name, l.like_count, s.share_count, r.reply_count " +
+            "from (select sb.*, nvl(sl.like_count, 0) lc, nvl(ss.share_count, 0) sc, nvl(sr.reply_count, 0) rc, " +
+            "row_number() over(order by sl.like_count, ss.share_count, sr.reply_count) rn " +
             "from sub_bookcase sb " +
             "left join (select parent_bookcase_seq, count(*) like_count " +
             "from like_count group by parent_bookcase_seq) sl " +
             "on sb.bookcase_seq = sl.parent_bookcase_seq " +
+            "left join (select parent_bookcase_seq, count(*) share_count " +
+            "from share_count group by parent_bookcase_seq) ss " +
+            "on sb.bookcase_seq = ss.parent_bookcase_seq " +
+            "left join (select parent_bookcase_seq, count(*) reply_count " +
+            "from share_reply group by parent_bookcase_seq) sr " +
+            "on sb.bookcase_seq = sr.parent_bookcase_seq " +
             "where share_public = 'Y') b " +
             "left join account a on b.account_seq = a.account_seq " +
             "left join (select parent_bookcase_seq, count(*) like_count " +
@@ -120,8 +128,8 @@ public interface SubBookcaseDAO {
             "from share_reply group by parent_bookcase_seq) r " +
             "on b.bookcase_seq = r.parent_bookcase_seq " +
             "where rn <= 10 " +
-            "order by lc desc")
-    List<SubBookcaseDTO> selectAllListByLikeCount();
+            "order by lc desc, sc desc, rc desc")
+    List<SubBookcaseDTO> selectAllListSortByPopular();
 
     @Delete("delete sub_bookcase where bookcase_seq = #{value}")
     void deleteBySeq(int bookcase_seq);
