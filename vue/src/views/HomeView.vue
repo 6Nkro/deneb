@@ -44,7 +44,10 @@
 
       </div>
 
-      <div class="text-start chart">
+      <div
+        class="text-start chart"
+        data-aos="zoom-out"
+        data-aos-duration="1000">
         <div class="chart-title mb-3">인기 Top10</div>
         <hr>
         <div
@@ -152,11 +155,6 @@ export default {
   components: { SharePostDetail },
   data () {
     return {
-      intro: [
-        '북마크를 손쉽게 관리해보세요.',
-        '나만의 북마크 페이지를 꾸며보세요.',
-        '내 북마크를 다른 사용자와 공유해보세요.'
-      ],
       postList: [],
       post: null,
       post_detail: false,
