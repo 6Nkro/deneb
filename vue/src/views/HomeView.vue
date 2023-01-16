@@ -131,6 +131,82 @@
 
       </div>
 
+      <div class="text-start comment">
+
+        <div class="chart-title mb-3">Comment</div>
+        <div class="d-inline-flex justify-center w-100 comment-input">
+          <v-textarea
+            variant="outlined"
+            placeholder="하고 싶은 말이나 건의 사항등을 적어주세요."
+            v-model="comment_contents"
+            :class="{invalid_comment: comment_contents === ''}"
+            no-resize
+            rows="3"
+            counter
+            maxlength="200"
+            @keydown.prevent.enter="sendComment"/>
+          <v-btn
+            variant="outlined"
+            size="large"
+            color="grey"
+            style="border-radius: 0; height:104px"
+            @click="sendComment">
+            <v-icon
+              icon="mdi-send"
+              color="blue"/>
+          </v-btn>
+        </div>
+
+        <div class="justify-center">
+
+          <hr class="mt-3">
+
+          <div v-if="commentList.length === 0">
+            <div class="py-3 text-center">
+              아직 등록된 코멘트가 없어요.
+            </div>
+            <hr>
+          </div>
+
+          <div v-if="commentList.length > 0">
+            <div
+              v-for="(item, index) in commentList"
+              :key="index">
+              <div class="py-4 d-flex align-center">
+                <div style="width:15%" class="comment-name text-truncate text-start px-1">
+                  {{ item.user_name }}
+                </div>
+                <div style="width:70%" class="comment-contents text-start px-1">
+                  {{ item.reply_contents }}
+                </div>
+                <div style="width:15%" class="text-end px-1">
+                <span class="comment-date">
+                  {{ getPostDateFormat(item.write_date) }}
+                </span>
+                  <v-icon
+                    class="pointer"
+                    v-if="this.$store.state.accountStore.account.account_seq === item.account_seq"
+                    icon="mdi-close"
+                    size="x-small"
+                    color="red-lighten-3"
+                    @click="deleteComment(item.reply_seq)"/>
+                </div>
+              </div>
+              <hr>
+            </div>
+          </div>
+
+        </div>
+
+        <v-pagination
+          class="pagination mt-5 mb-10"
+          v-model="currentPage"
+          :length="pageSize"
+          :total-visible="8"
+          rounded="circle"/>
+
+      </div>
+
     </div>
 
     <share-post-detail
@@ -158,18 +234,29 @@ export default {
       postList: [],
       post: null,
       post_detail: false,
-      loadComplete: false
+      loadComplete: false,
+      comment_contents: '',
+      commentList: [],
+      pageSize: 0,
+      currentPage: 0
     }
   },
   setup () {
   },
-  created () {
+  async created () {
     AOS.init()
-    this.getChartList()
+    await this.getChartList()
+    await this.getCommentList(-1)
+    this.currentPage = this.pageSize
   },
   mounted () {
   },
   unmounted () {
+  },
+  watch: {
+    currentPage: function () {
+      this.getCommentList(this.currentPage)
+    }
   },
   methods: {
     async getChartList () {
@@ -206,6 +293,58 @@ export default {
       }
       this.post = item
       this.post_detail = true
+    },
+    async getCommentList (page) {
+      const url = '/reply/comment'
+      const params = {
+        page: page
+      }
+      const res = await this.$axios.get(url, { params })
+      if (!res.data) {
+        return false
+      }
+      this.pageSize = Math.ceil(res.data.count / 10)
+      this.commentList = res.data.commentList
+    },
+    async sendComment () {
+      if (!this.$store.state.accountStore.isLogin) {
+        this.$emit('openLogin')
+        return false
+      }
+      const items = document.querySelectorAll('.invalid_comment')
+      if (this.loading || !this.$isValid(items)) {
+        return false
+      }
+      const url = '/reply/send'
+      const params = {
+        account_seq: this.$store.state.accountStore.account.account_seq,
+        parent_bookcase_seq: -1,
+        reply_contents: this.comment_contents
+      }
+      this.comment_contents = ''
+      await this.$axios.post(url, null, { params })
+      await this.getCommentList(-1)
+      this.currentPage = this.pageSize
+    },
+    async deleteComment (seq) {
+      const url = '/reply/delete'
+      const params = {
+        parent_bookcase_seq: -1,
+        reply_seq: seq
+      }
+      await this.$axios.post(url, null, { params })
+      if (this.commentList.length === 1) {
+        await this.getCommentList(this.currentPage - 1)
+        this.currentPage -= 1
+      } else {
+        await this.getCommentList(this.currentPage)
+      }
+    },
+    getPostDateFormat (date) {
+      const today = new Date()
+      const shareDate = new Date(new Date(date).getTime() + 32400000)
+      const timeGap = today.getTime() - (shareDate.getTime())
+      return timeGap > 86400000 ? this.$getDateFormat(shareDate).slice(0, 10) : this.$getDateFormat(shareDate).slice(11, 16)
     }
   }
 }
@@ -253,5 +392,22 @@ hr {
 
 .post:hover {
   background-color: #E8E8E8;
+}
+
+.comment {
+  margin: 5rem 0;
+}
+
+.comment-input {
+  max-height: 126px;
+}
+
+.comment-name {
+  font-weight: bold;
+}
+
+.comment-date {
+  color: #808080;
+  font-size: small;
 }
 </style>

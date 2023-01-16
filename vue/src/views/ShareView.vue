@@ -60,7 +60,7 @@ export default {
     async getPostList (params) {
       const url = params.search ? '/share/search' : '/share/list'
       const res = await this.$axios.get(url, { params })
-      this.pageSize = Math.floor(res.data.count / 12) + 1
+      this.pageSize = Math.ceil(res.data.count / 12)
       this.postList = res.data.postList
       this.showContents = true
     },

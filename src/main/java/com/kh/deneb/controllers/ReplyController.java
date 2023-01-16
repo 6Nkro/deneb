@@ -34,4 +34,10 @@ public class ReplyController {
     public String getReplyList(int parent_bookcase_seq) {
         return new Gson().toJson(replyService.getReplyList(parent_bookcase_seq));
     }
+
+    @GetMapping("/comment")
+    @ResponseBody
+    public String getCommentList(int page) {
+        return new Gson().toJson(replyService.getCommentList(page));
+    }
 }

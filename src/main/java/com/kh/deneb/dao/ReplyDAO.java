@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashMap;
 import java.util.List;
 
 @Mapper
@@ -26,4 +27,17 @@ public interface ReplyDAO {
 
     @Delete("delete share_reply where parent_bookcase_seq = #{value}")
     void deleteBySeq(int bookcase_seq);
+
+    @Select("select r.*, a.user_name " +
+            "from (select sr.*, sa.user_name, row_number() over(order by reply_seq) rn " +
+            "from share_reply sr " +
+            "left join account sa on sr.account_seq = sa.account_seq " +
+            "where parent_bookcase_seq = -1) r " +
+            "left join account a on r.account_seq = a.account_seq " +
+            "where rn between #{minSeq} and #{maxSeq} " +
+            "order by rn")
+    List<ReplyDTO> selectAllListBySeqRange(HashMap<String, Object> params);
+
+    @Select("select count(*) from share_reply where parent_bookcase_seq = -1")
+    int selectCommentCount();
 }

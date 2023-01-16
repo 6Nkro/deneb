@@ -5,6 +5,7 @@ import com.kh.deneb.dto.ReplyDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -24,5 +25,26 @@ public class ReplyService {
     public List<ReplyDTO> deleteReply(ReplyDTO reply) {
         replyDAO.delete(reply.getReply_seq());
         return getReplyList(reply.getParent_bookcase_seq());
+    }
+
+    public HashMap<String, Object> getCommentList(int page) {
+        HashMap<String, Object> params = new HashMap<>();
+        HashMap<String, Object> commentList = new HashMap<>();
+
+        int count = replyDAO.selectCommentCount();
+        if (page == -1 ) {
+            page = (int) Math.ceil(count / 10d);
+        }
+
+        System.out.println(count);
+        System.out.println(page);
+
+        params.put("minSeq", page * 10 - 9);
+        params.put("maxSeq", page * 10);
+
+        commentList.put("commentList", replyDAO.selectAllListBySeqRange(params));
+        commentList.put("count", count);
+
+        return commentList;
     }
 }

@@ -86,7 +86,7 @@
           rows="3"
           counter
           maxlength="200"
-          @keydown.enter="sendReply"/>
+          @keydown.prevent.enter="sendReply"/>
         <v-btn
           variant="outlined"
           size="large"
@@ -410,7 +410,7 @@ export default {
 }
 
 .reply-input {
-  margin: 2rem 1rem 0 0;
+  margin: 2rem 0 0 0;
 }
 
 .reply-name {

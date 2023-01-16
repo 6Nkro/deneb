@@ -81,11 +81,13 @@ public interface SubBookcaseDAO {
     List<SubBookcaseDTO> selectSearchListBySeqRange(HashMap<String, Object> params);
     @Select("select count(*) from sub_bookcase where share_public = 'Y'")
     int selectCountPublic();
+
     @Select("select count(*) from sub_bookcase b " +
             "left join account a on b.account_seq = a.account_seq " +
             "where share_public = 'Y' " +
             "and ${search_type} like '%'||#{search_text}||'%'")
     int selectSearchCountPublic(HashMap<String, Object> params);
+
     @Select("select * from sub_bookcase where share_code = #{value}")
     SubBookcaseDTO selectAllByShareCode(String share_code);
 
