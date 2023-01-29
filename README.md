@@ -10,5 +10,7 @@
 * 주소 : http://deneb.run
 
 ## 개발환경
-BE : JDK 11, Spring Boot, MyBatis, Oracle Database
-FE : HTML, CSS, Javascript, Vue.js
+* BE : JDK 11, Spring Boot, MyBatis, Oracle Database
+* FE : HTML, CSS, Javascript, Vue.js
+* Server : AWS EC2, Oracle Cloud
+* F/W, Library : vuetify, axios, vuex-persistedstate, sweetalert2, vue3-youtube, vuedraggable, vue-final-modal
