@@ -4,7 +4,7 @@
 ## 개요
 * 개발기간 : 2022/12/08 ~ 2023/01/05
 * 개발인원 : 1명
-* 주소 : http://deneb.run
+* 주소 : http://deneb.run?test
 
 ## 개발환경
 * BE : JDK 11, Spring Boot, MyBatis, Oracle Database
@@ -17,26 +17,8 @@
 <img src="https://user-images.githubusercontent.com/114794711/216782041-72f875e7-587d-479b-8992-ebee43e9c0f7.gif" />
 <img src="https://user-images.githubusercontent.com/114794711/216785707-310ab598-b5ae-49ae-9b1c-6ae19dcd1589.png" />
 
-페이지, 폴더, 북마크로 구분되는 각각의 오브젝트는 사용자가 임의로 순서를 변경할 수 있어야 하고 순서 정보를 저장해야 했는데, 순서 정보는 각 오브젝트의 상위(계정 > 페이지, 페이지 > 폴더, ...) 테이블에서 직렬화 된 배열 형태로 관리하도록 했습니다.
-데이터가 insert, delete, drag & drop으로 인한 순서 이동으로 변경 될 때, 상위 테이블의 order 컬럼을 추가로 update 해줘야 하는점이 있어 옳은 설계였는지 아직 의문이 남습니다.
-<br />
-
-* 북마크 공유 문제
-
-사용자가 북마크(페이지) 공유를 누른 시점의 데이터를 저장하기 위해 clone 테이블에 카피 데이터를 insert 했습니다.
-
-```
-INSERT INTO [clone 페이지 테이블] VALUES (...); -- 페이지 갯수만큼 반복
-...
-
-INSERT INTO [clone 폴더 테이블] VALUES (...); -- 폴더 갯수만큼 반복
-...
-
-INSERT INTO [clone 북마크 테이블] VALUES (...); -- 북마크 갯수만큼 반복
-...
-```
-서비스에서 반복문을 걸쳐 row의 수만큼 insert를 보내다보니 데이터가 커질 수록 성능이 저하될 우려가 생겨 한번에 여러 행을 insert 시키는 쿼리로 개선했습니다.
-
+페이지, 폴더, 북마크로 구분되는 각각의 오브젝트는 사용자가 임의로 순서를 변경할 수 있어야 하고 변경된 순서 정보를 저장해야 했는데, 순서 정보는 각 오브젝트의 상위(계정 > 페이지, 페이지 > 폴더, ...) 테이블에서 직렬화 된 배열 형태로 관리하도록 했습니다.
+데이터가 insert, delete, drag & drop으로 인한 순서 이동으로 변경 될 때마다 상위 테이블의 order 컬럼을 추가로 update 해줘야 하는점이 있어 옳은 설계였는지 아직 의문이 남습니다.
 
 ## ERD
 <img src="https://user-images.githubusercontent.com/114794711/215716512-21b8e93d-a6fc-485a-9362-e775d6d180e1.png" />
