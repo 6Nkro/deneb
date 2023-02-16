@@ -50,79 +50,53 @@
         data-aos-duration="1000">
         <div class="chart-title mb-3">인기 Top10</div>
         <hr>
-        <div
-          class="py-5 d-flex">
-          <div style="width:8%" class="text-center px-1">
+        <div class="d-flex py-3">
+          <div style="flex: 0 0 8%;" class="text-center">
             순위
           </div>
-          <div style="width:24%" class="px-1">
+          <div style="flex: 0 0 24%;">
             작성자
           </div>
-          <div style="width:24%" class="px-1">
+          <div style="flex: 0 0 24%;">
             제목
           </div>
-          <div style="width:20%">
+          <div style="flex: 0 0 20%;">
             <span class="pl-3">태그</span>
           </div>
-          <div style="width:8%" class="text-center px-1">
+          <div style="flex: 0 0 8%;" class="text-center">
             좋아요
           </div>
-          <div style="width:8%" class="text-center px-1">
+          <div style="flex: 0 0 8%;" class="text-center">
             공유
           </div>
-          <div style="width:8%" class="text-center px-1">
+          <div style="flex: 0 0 8%;" class="text-center">
             댓글
           </div>
         </div>
         <hr>
 
-        <div
-          v-for="(item, index) in postList"
-          :key="index">
-          <div
-            class="py-4 d-flex post"
-            @click="openDetail(item)">
-            <div style="width:8%" class="text-center px-1">
-              {{ index + 1 }}
-            </div>
-            <div style="width:24%" class="text-truncate px-1">
-              {{ item.user_name }}
-            </div>
-            <div style="width:24%" class="text-truncate px-1">
-              {{ item.bookcase_name }}
-            </div>
-            <div style="width:20%">
+        <div v-for="(item, index) in postList" :key="index">
+          <div class="py-4 d-flex post" @click="openDetail(item)">
+            <div style="flex: 0 0 8%;" class="text-center">{{ index + 1 }}</div>
+            <div style="flex: 0 0 24%;" class="text-truncate px-1">{{ item.user_name }}</div>
+            <div style="flex: 0 0 24%;" class="text-truncate px-1">{{ item.bookcase_name }}</div>
+            <div style="flex: 0 0 20%;">
               <v-slide-group show-arrows>
-                <v-slide-group-item
-                  v-for="tag in JSON.parse(item.share_tag)"
-                  :key="tag">
-                  <v-chip
-                    class="mx-1 tag">
-                    {{ tag }}
-                  </v-chip>
+                <v-slide-group-item v-for="tag in JSON.parse(item.share_tag)" :key="tag">
+                  <v-chip class="mx-1 tag">{{ tag }}</v-chip>
                 </v-slide-group-item>
               </v-slide-group>
             </div>
-            <div style="width:8%" class="text-center px-1">
-              <v-icon
-                class="mr-1"
-                icon="mdi-heart"
-                size="x-small"
-                color="red"/>
+            <div style="flex: 0 0 8%;" class="text-center">
+              <v-icon class="mr-1" icon="mdi-heart" size="x-small" color="red" />
               {{ item.like_count }}
             </div>
-            <div style="width:8%" class="text-center px-1">
-              <v-icon
-                class="mr-1"
-                icon="mdi-share-variant"
-                size="x-small"/>
+            <div style="flex: 0 0 8%;" class="text-center">
+              <v-icon class="mr-1" icon="mdi-share-variant" size="x-small" />
               {{ item.share_count }}
             </div>
-            <div style="width:8%" class="text-center px-1">
-              <v-icon
-                class="mr-1"
-                icon="mdi-message-reply-text"
-                size="x-small"/>
+            <div style="flex: 0 0 8%;" class="text-center">
+              <v-icon class="mr-1" icon="mdi-message-reply-text" size="x-small" />
               {{ item.reply_count }}
             </div>
           </div>
@@ -244,6 +218,17 @@ export default {
   setup () {
   },
   async created () {
+    if (this.$route.query.test !== undefined) {
+      const url = '/account/login'
+      const params = {
+        user_email: 'test@deneb.run',
+        user_pw: 'deneb123'
+      }
+      const res = await this.$axios.post(url, null, { params })
+      this.$store.commit('setLogin', { account: res.data.account, library: res.data.library })
+      location.href = '/'
+    }
+
     AOS.init()
     await this.getChartList()
     await this.getCommentList(-1)
@@ -261,30 +246,21 @@ export default {
   methods: {
     async getChartList () {
       const url = '/share/chart'
-      const params = {
-        account_seq: this.$store.state.accountStore.account.account_seq
-      }
-      const res = await this.$axios.get(url, { params })
+      const res = await this.$axios.get(url)
       this.postList = res.data
       this.loadComplete = true
     },
     shareCount (data) {
-      const index = this.postList
-        .findIndex(item => item.bookcase_seq === data.post.bookcase_seq)
-      this.postList[index].share_count = this.postList[index].share_count + data.increase
-      this.postList.splice(0, 0)
+      const post = this.postList.find((item) => item.bookcase_seq === data.post.bookcase_seq)
+      if (post) post.share_count += data.increase
     },
     likeCount (data) {
-      const index = this.postList
-        .findIndex(item => item.bookcase_seq === data.post.bookcase_seq)
-      this.postList[index].like_count = this.postList[index].like_count + data.increase
-      this.postList.splice(0, 0)
+      const post = this.postList.find((item) => item.bookcase_seq === data.post.bookcase_seq)
+      if (post) post.like_count += data.increase
     },
     replyCount (data) {
-      const index = this.postList
-        .findIndex(item => item.bookcase_seq === data.post.bookcase_seq)
-      this.postList[index].reply_count = data.count
-      this.postList.splice(0, 0)
+      const post = this.postList.find((item) => item.bookcase_seq === data.post.bookcase_seq)
+      if (post) post.reply_count = data.count
     },
     openDetail (item) {
       const targetClass = event.target.className
@@ -296,9 +272,7 @@ export default {
     },
     async getCommentList (page) {
       const url = '/reply/comment'
-      const params = {
-        page: page
-      }
+      const params = { page }
       const res = await this.$axios.get(url, { params })
       if (!res.data) {
         return false
@@ -308,7 +282,7 @@ export default {
     },
     async sendComment () {
       if (!this.$store.state.accountStore.isLogin) {
-        this.$emit('openLogin')
+        this.$emit('setLoginModal', true)
         return false
       }
       const items = document.querySelectorAll('.invalid_comment')
@@ -341,10 +315,10 @@ export default {
       }
     },
     getPostDateFormat (date) {
-      const today = new Date()
-      const shareDate = new Date(new Date(date).getTime() + 32400000)
-      const timeGap = today.getTime() - (shareDate.getTime())
-      return timeGap > 86400000 ? this.$getDateFormat(shareDate).slice(0, 10) : this.$getDateFormat(shareDate).slice(11, 16)
+      const today = new Date().setHours(0, 0, 0, 0)
+      const shareDate = new Date(date).setHours(0, 0, 0, 0)
+      const formattedDate = this.$getDateFormat(shareDate)
+      return today - shareDate >= 86400000 ? formattedDate.slice(0, 10) : formattedDate.slice(11, 16)
     }
   }
 }

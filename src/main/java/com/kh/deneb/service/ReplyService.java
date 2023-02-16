@@ -36,9 +36,6 @@ public class ReplyService {
             page = (int) Math.ceil(count / 10d);
         }
 
-        System.out.println(count);
-        System.out.println(page);
-
         params.put("minSeq", page * 10 - 9);
         params.put("maxSeq", page * 10);
 
