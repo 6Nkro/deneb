@@ -10,7 +10,7 @@
 * BE : JDK 11, Spring Boot, MyBatis, Oracle Database
 * FE : HTML, CSS, Javascript, Vue.js
 * Server : AWS EC2, Oracle Cloud
-* F/W, Library : vuetify, axios, vuex-persistedstate, sweetalert2, vue3-youtube, vuedraggable, vue-final-modal
+* F/W, Library : vuetify, axios, vue-router, vuex, vuex-persistedstate, sweetalert2, vue3-youtube, vuedraggable, vue-final-modal
 
 ## 개발하며 겪은 어려웠던 점 / 개선할 점
 ### 순서 정보에 대한 처리
