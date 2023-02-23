@@ -15,13 +15,32 @@ http://deneb.run
 * Server : AWS EC2, Oracle Cloud
 * F/W, Library : vuetify, axios, vuex-persistedstate, sweetalert2, vue3-youtube, vuedraggable, vue-final-modal
 
-## 개발하며 겪은 어려웠던 점 / 과제
-* 순서 정보에 대한 처리
+## 개발하며 겪은 어려웠던 점 / 개선할 점
+### 순서 정보에 대한 처리
 <img src="https://user-images.githubusercontent.com/114794711/216782041-72f875e7-587d-479b-8992-ebee43e9c0f7.gif" />
 <img src="https://user-images.githubusercontent.com/114794711/216785707-310ab598-b5ae-49ae-9b1c-6ae19dcd1589.png" />
 
-페이지, 폴더, 북마크로 구분되는 각각의 오브젝트는 사용자가 임의로 순서를 변경할 수 있어야 하고 변경된 순서 정보를 저장해야 했는데, 순서 정보는 각 오브젝트의 상위(계정 > 페이지, 페이지 > 폴더, ...) 테이블에서 직렬화 된 배열 형태로 관리하도록 했습니다.
-데이터가 insert, delete, drag & drop으로 인한 순서 이동으로 변경 될 때마다 상위 테이블의 order 컬럼을 추가로 update 해줘야 하는점이 있어 옳은 설계였는지 아직 의문이 남습니다.
+* 데이터 정규화 및 자료 구조 선택을 올바르게 했는지에 대한 고찰 필요
+
+### 모듈간 결합도 문제
+<img src="https://user-images.githubusercontent.com/114794711/220876332-ba6b52d8-c7a1-4a05-92ba-5fc8d981aa7a.png" />
+
+* 모듈 분리의 의의에 대해 다시 생각해보기
+* 필드에 @Autowired 어노테이션은 현재 권장하지 않는 추세
+
+### 클린 코드
+
+* 러프한 코드에 대한 리팩토링 필요
+
+### 컴포넌트 분리와 상태관리
+
+* 컴포넌트를 분리하는 기준과 재사용성을 고려한 컴포넌트 분리 방법을 다시 고민해보기
+* 컴포넌트 깊이에 따라 복잡해지는 상태관리를 효율적으로 해보기(Vuex 활용)
+
+### 동작 효율성
+
+* 탐색, 정렬, 상태관리에서 불필요한 동작 또는 오버헤드를 만들고 있는지 살펴보기
+* 쿼리를 효율적으로 쓰고 있는지, 커넥션에 악영향을 끼치는 부분 생각해보기(batch 활용 고려)
 
 ## ERD
 <img src="https://user-images.githubusercontent.com/114794711/215716512-21b8e93d-a6fc-485a-9362-e775d6d180e1.png" />
